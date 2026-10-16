@@ -1,0 +1,217 @@
+/* Site-wide polish — consistency, mobile nav, readability */
+
+:root {
+  --header-h: 64px;
+  --focus-ring: 0 0 0 2px rgba(11, 13, 20, 0.9), 0 0 0 4px rgba(201, 162, 39, 0.65);
+}
+
+::selection {
+  background: rgba(201, 162, 39, 0.35);
+  color: #f7f1e6;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Header + mobile nav */
+.site-header {
+  min-height: var(--header-h);
+  padding: 0.85rem 1.25rem;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+.site-header .wordmark {
+  flex-shrink: 0;
+  z-index: 60;
+}
+.site-header .nav-toggle {
+  display: none;
+  z-index: 60;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  background: rgba(12, 14, 20, 0.85);
+  color: #e0c35a;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 0;
+}
+.site-header .nav-toggle:hover {
+  border-color: #e0c35a;
+  background: rgba(201, 162, 39, 0.12);
+}
+.site-header nav {
+  flex-wrap: wrap;
+  gap: 0.65rem 1.15rem;
+  font-size: 0.88rem;
+  letter-spacing: 0.05em;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+}
+.site-header nav a {
+  white-space: nowrap;
+  padding: 0.15rem 0;
+}
+.site-header nav a.active {
+  color: var(--gold-glow);
+}
+
+@media (max-width: 1100px) {
+  .site-header .nav-toggle {
+    display: inline-flex;
+  }
+  .site-header nav {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    padding: calc(var(--header-h) + 1rem) 1.25rem 2rem;
+    background:
+      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(201, 162, 39, 0.12), transparent 50%),
+      rgba(8, 9, 14, 0.97);
+    backdrop-filter: blur(12px);
+    overflow-y: auto;
+  }
+  .site-header nav.is-open {
+    display: flex;
+  }
+  .site-header nav a {
+    font-size: 1.05rem;
+    padding: 0.85rem 0.5rem;
+    border-bottom: 1px solid rgba(236, 229, 212, 0.08);
+    letter-spacing: 0.08em;
+  }
+  .site-header nav a::after {
+    display: none;
+  }
+  body.nav-open {
+    overflow: hidden;
+  }
+}
+
+/* Main rhythm */
+main {
+  min-height: 50vh;
+}
+.section,
+.exhibit-section {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+/* Cards & links shared */
+a.btn,
+.btn {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+a.btn:hover,
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Footer */
+.site-footer {
+  margin-top: 2rem;
+}
+.site-footer a:hover {
+  color: var(--gold-glow);
+}
+
+/* Exhibit pages: consistent max width */
+.exhibit-answer-body,
+.exhibit-section-intro {
+  max-width: 42rem;
+}
+.exhibit-section h2 {
+  letter-spacing: 0.04em;
+}
+
+/* Figures grid polish if present */
+.figure-card,
+.concept-card {
+  border-radius: 10px;
+}
+
+/* Reduce horizontal overflow */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Page load: slightly softer default link underline in content */
+.exhibit-answer-body a,
+.work-prose a,
+.fp-essay-body a {
+  color: #e0c35a;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(201, 162, 39, 0.4);
+}
+.exhibit-answer-body a:hover,
+.work-prose a:hover,
+.fp-essay-body a:hover {
+  text-decoration-color: #e0c35a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a.btn, .btn, .prayer-card, .mass-part-card, .tradition-card {
+    transition: none !important;
+  }
+}
+
+.start-here-grid { margin-top: 0.5rem; }
+.start-here .tradition-card { cursor: pointer; }
+
+a.tradition-card h3 { margin-top: 0; }
+
+
+/* Traditional Catholic register */
+:root {
+  --bg: #0a0908;
+  --bg-deep: #060504;
+  --bg-panel: #14110e;
+  --ink: #f0e6d2;
+  --ink-dim: #a89880;
+  --hairline: rgba(212, 184, 120, 0.14);
+  --gold: #c5a028;
+  --gold-glow: #f0d78c;
+}
+body {
+  background:
+    radial-gradient(ellipse 100% 70% at 50% -15%, rgba(180, 140, 50, 0.08), transparent 50%),
+    var(--bg);
+}
+.site-header {
+  border-bottom-color: rgba(197, 160, 40, 0.28);
+  background: linear-gradient(to bottom, rgba(6,5,4,0.96), rgba(10,9,8,0.88));
+}
+.site-header .wordmark {
+  letter-spacing: 0.28em;
+}
+.site-footer {
+  border-top-color: rgba(197, 160, 40, 0.22);
+  font-family: var(--serif-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+h1, h2, h3 {
+  letter-spacing: 0.06em;
+}

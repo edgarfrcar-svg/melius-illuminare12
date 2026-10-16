@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sacred Texts &mdash; Holy Bible &mdash; Melius Illuminare</title>
+<link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/site-polish.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+  <link rel="stylesheet" href="../css/sacred-objects.css">
+<style>
+  /* Bible reader specific layout — Bible Gateway inspired */
+  .bible-app {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 140px);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  @media (max-width: 860px) {
+    .bible-app { grid-template-columns: 1fr; }
+    .bible-sidebar { display: none; }
+    .bible-sidebar.open { display: block; position: fixed; inset: 0; z-index: 80; background: var(--bg-deep); overflow-y: auto; padding: 1.5rem; }
+  }
+
+  .bible-sidebar {
+    border-right: 1px solid var(--hairline);
+    background: var(--bg-deep);
+    padding: 1.25rem 1rem 2rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 70px);
+    position: sticky;
+    top: 70px;
+  }
+  .bible-sidebar h3 {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-glow);
+    margin: 1.4rem 0 0.6rem;
+    padding: 0 0.4rem;
+  }
+  .bible-sidebar h3:first-child { margin-top: 0.3rem; }
+  .book-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--ink-dim);
+    font-family: var(--serif-body);
+    font-size: 0.95rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .book-btn:hover, .book-btn:focus-visible { color: var(--ink); background: rgba(236,229,212,0.06); }
+  .book-btn.active { color: var(--gold-glow); background: rgba(201,162,39,0.12); }
+
+  .bible-main {
+    padding: 1.5rem 2rem 4rem;
+    max-width: 720px;
+  }
+  @media (max-width: 860px) { .bible-main { padding: 1rem 1.1rem 3rem; } }
+
+  .bible-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    align-items: center;
+    margin-bottom: 1.6rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .bible-toolbar select,
+  .bible-toolbar button {
+    font-family: var(--serif-body);
+    font-size: 0.95rem;
+    background: var(--bg-panel);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+    padding: 0.5rem 0.85rem;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .bible-toolbar select:focus,
+  .bible-toolbar button:focus-visible {
+    outline: 1px solid var(--gold);
+    border-color: var(--gold);
+  }
+  .bible-toolbar .nav-btn {
+    min-width: 2.4rem;
+    text-align: center;
+    font-size: 1.1rem;
+  }
+  .bible-toolbar .nav-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .mobile-books-toggle {
+    display: none;
+    font-family: var(--serif-display);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--bg-panel);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+    padding: 0.5rem 0.9rem;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  @media (max-width: 860px) {
+    .mobile-books-toggle { display: inline-block; }
+  }
+
+  .passage-header {
+    margin-bottom: 1.5rem;
+  }
+  .passage-header h1 {
+    font-size: clamp(1.6rem, 3.5vw, 2.1rem);
+    margin: 0 0 0.35rem;
+  }
+  .passage-header .trans-label {
+    color: var(--ink-dim);
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+
+  .verse-block.is-target {
+    background: rgba(201, 162, 39, 0.22);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.45);
+    border-radius: 6px;
+    transition: background 0.8s ease, box-shadow 0.8s ease;
+  }
+  .verse-block.is-target.fade {
+    background: transparent;
+    box-shadow: none;
+  }
+  .verse-block {
+    margin-bottom: 0.55rem;
+    line-height: 1.7;
+  }
+  .verse-block .vnum {
+    font-family: var(--serif-display);
+    font-size: 0.72rem;
+    color: var(--gold-glow);
+    margin-right: 0.45rem;
+    vertical-align: super;
+    user-select: none;
+  }
+
+  .loading-state, .error-state {
+    color: var(--ink-dim);
+    padding: 2rem 0;
+    text-align: center;
+  }
+  .error-state { color: #e8a0a0; }
+
+  .chapter-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--hairline);
+  }
+  .chapter-footer-nav button {
+    font-family: var(--serif-display);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    background: none;
+    border: 1px solid var(--hairline);
+    padding: 0.65rem 1.1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .chapter-footer-nav button:hover {
+    color: var(--gold-glow);
+    border-color: var(--gold);
+  }
+  .chapter-footer-nav button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .pd-note {
+    margin-top: 2.5rem;
+    font-size: 0.82rem;
+    color: var(--ink-dim);
+    border-top: 1px dashed var(--hairline);
+    padding-top: 1rem;
+  }
+
+  /* Chapter commentary panel (one primary PD voice) */
+  .chapter-commentary {
+    margin: 1.75rem 0 0.5rem;
+    border: 1px solid var(--hairline);
+    border-radius: 5px;
+    background: rgba(0,0,0,0.22);
+    overflow: hidden;
+  }
+  .chapter-commentary[hidden] { display: none !important; }
+  .chapter-commentary-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.85rem;
+    align-items: baseline;
+    padding: 0.75rem 1.1rem;
+    border-bottom: 1px solid var(--hairline);
+    background: rgba(201,162,39,0.06);
+  }
+  .chapter-commentary-head .label {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-glow);
+  }
+  .chapter-commentary-head .voice-name {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .chapter-commentary-head .voice-name a {
+    color: var(--gold-glow);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+  .chapter-commentary-head .voice-name a:hover {
+    border-bottom-color: var(--gold);
+  }
+  .chapter-commentary-head .voice-work {
+    font-size: 0.88rem;
+    color: var(--ink-dim);
+    font-style: italic;
+  }
+  .chapter-commentary-body {
+    padding: 1rem 1.15rem 1.15rem;
+  }
+  .chapter-commentary-body p {
+    margin: 0 0 0.75rem;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .chapter-commentary-cite {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+  }
+  /* comm-panel-v2 */
+  .chapter-commentary {
+    margin: 2rem 0 1.5rem;
+    padding: 1.25rem 1.35rem 1.35rem;
+    border: 1px solid rgba(201, 162, 39, 0.28);
+    border-radius: 8px;
+    background:
+      linear-gradient(135deg, rgba(201, 162, 39, 0.07), rgba(14, 12, 10, 0.4));
+  }
+  .chapter-commentary-head .label {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c9a227;
+    margin-bottom: 0.35rem;
+  }
+  .chapter-commentary-head .voice-name {
+    font-size: 1.15rem;
+    color: #f0e8d8;
+  }
+  .chapter-commentary-body p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #e4dcc8;
+  }
+  .chapter-commentary-empty {
+    margin: 1.5rem 0 0.25rem;
+    padding: 0.85rem 1rem;
+    border: 1px dashed var(--hairline);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: var(--ink-dim);
+    line-height: 1.5;
+  }
+
+  /* ── Pivotal Moments (Sacred Texts scaffolding) ── */
+  .pivotal-moments {
+    margin: 1.5rem 0 1.25rem;
+    border: 1px solid rgba(201,162,39,0.35);
+    border-radius: 6px;
+    background:
+      linear-gradient(165deg, rgba(201,162,39,0.07), transparent 42%),
+      rgba(0,0,0,0.28);
+    overflow: hidden;
+  }
+  .pivotal-moments[hidden] { display: none !important; }
+  .pivotal-moments-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    align-items: baseline;
+    padding: 0.75rem 1.15rem;
+    border-bottom: 1px solid var(--hairline);
+    background: rgba(201,162,39,0.08);
+  }
+  .pivotal-moments-head .label {
+    font-family: var(--serif-display, Cinzel, serif);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold-glow);
+  }
+  .pivotal-moments-head .pivot-head-note {
+    color: var(--ink-dim);
+    font-size: 0.9rem;
+  }
+  .pivotal-moments-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1rem 1.1rem 1.15rem;
+  }
+  .pivot-card {
+    padding: 1rem 1.05rem 1.05rem;
+    border: 1px solid var(--hairline);
+    border-radius: 5px;
+    background: var(--bg-panel, rgba(12,14,20,0.85));
+  }
+  .pivot-card-head {
+    margin-bottom: 0.55rem;
+  }
+  .pivot-card-head h3 {
+    margin: 0.25rem 0 0.4rem;
+    font-family: var(--serif-display, Cinzel, serif);
+    font-size: 1.15rem;
+    letter-spacing: 0.04em;
+    color: var(--gold-glow);
+    font-weight: 500;
+  }
+  .pivot-cat {
+    display: inline-block;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bronze, #a97142);
+    border: 1px solid rgba(169,113,66,0.4);
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+  }
+  .pivot-status {
+    display: inline-block;
+    margin-left: 0.4rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    border: 1px dashed var(--hairline);
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+  }
+  .pivot-refs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .pivot-ref {
+    font-size: 0.82rem;
+    color: var(--ink-dim);
+    background: rgba(236,229,212,0.05);
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+  }
+  .pivot-summary {
+    margin: 0 0 0.65rem;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .pivot-significance,
+  .pivot-typology {
+    margin: 0 0 0.55rem;
+    line-height: 1.55;
+    color: var(--ink-dim);
+    font-size: 0.98rem;
+  }
+  .pivot-label {
+    display: block;
+    font-family: var(--serif-display, Cinzel, serif);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold-dim, var(--gold));
+    margin-bottom: 0.2rem;
+  }
+  .pivot-concepts {
+    margin-top: 0.35rem;
+  }
+  .pivot-chip {
+    display: inline-block;
+    margin: 0.2rem 0.35rem 0 0;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid rgba(201,162,39,0.35);
+    border-radius: 999px;
+    color: var(--gold-glow);
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: capitalize;
+  }
+  .pivot-chip:hover {
+    border-color: var(--gold);
+    background: rgba(201,162,39,0.1);
+  }
+  /* Pivotal verses: clean reader — text only glows gold on hover */
+  .verse-block.is-pivot {
+    cursor: pointer;
+    transition: color 0.18s ease, text-shadow 0.18s ease;
+  }
+  .verse-block.is-pivot:hover,
+  .verse-block.is-pivot:focus-visible {
+    color: var(--gold-glow, #e8c56a);
+    text-shadow:
+      0 0 0.5px rgba(232, 197, 106, 0.9),
+      0 0 12px rgba(201, 162, 39, 0.45),
+      0 0 22px rgba(201, 162, 39, 0.25);
+    outline: none;
+  }
+  .verse-block.is-pivot:hover .vnum,
+  .verse-block.is-pivot:focus-visible .vnum {
+    color: var(--gold-glow, #e8c56a);
+    text-shadow: 0 0 10px rgba(201, 162, 39, 0.4);
+  }
+  /* no name chip / no section label under the verse */
+  .verse-block.is-pivot-start::after {
+    content: none !important;
+    display: none !important;
+  }
+  /* keep chapter strip minimal; hide instructional hint */
+  .pivot-chapter-strip {
+    margin: 0.65rem 0 1rem;
+    padding: 0;
+    border: none;
+  }
+  .pivot-chapter-strip[hidden] { display: none !important; }
+  .pivot-strip-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.65rem;
+    align-items: center;
+  }
+  .pivot-strip-label {
+    font-family: var(--serif-display, Cinzel, serif);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .pivot-strip-links { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .pivot-strip-chip {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    color: var(--ink-dim);
+    text-decoration: none;
+    font-size: 0.8rem;
+    background: transparent;
+  }
+  .pivot-strip-chip:hover {
+    color: var(--gold-glow);
+    border-color: rgba(201,162,39,0.4);
+  }
+  .pivot-strip-hint { display: none !important; }
+  .pivotal-moments { display: none !important; }
+
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="../index.html" class="wordmark">MELIUS&nbsp;ILLUMINARE</a>
+  <nav>
+    <a href="../figures.html">Figures</a>
+    <a href="../concepts.html">Concepts</a>
+    <a href="../magisterium.html">Magisterium</a>
+      <a href="papacy.html">Papacy</a>
+      <a href="../prayer.html">Prayer</a>
+      <a href="../mass.html">Mass</a>
+    <a href="../spiritualities.html">Spiritualities</a>
+    <a href="../theological-tree.html">Theological Tree</a>
+    <a href="bible.html">Sacred Texts</a>
+    <a href="../store.html">Store</a>
+      <a href="../about.html">About</a>
+  </nav>
+</header>
+
+<div class="bible-app">
+
+  <!-- Sidebar: all 66 books -->
+  <aside class="bible-sidebar" id="bible-sidebar" aria-label="Bible books">
+    <h3>Old Testament</h3>
+    <div id="ot-books"></div>
+    <h3>New Testament</h3>
+    <div id="nt-books"></div>
+  </aside>
+
+  <!-- Main reading pane -->
+  <main class="bible-main">
+    <div class="bible-toolbar">
+      <button type="button" class="mobile-books-toggle" id="mobile-books-btn" aria-label="Open book list">Books</button>
+
+      <select id="translation-select" aria-label="Translation">
+        <option value="kjv">King James Version (KJV)</option>
+        <option value="asv">American Standard Version (ASV)</option>
+        <option value="dra">Douay-Rheims (1899)</option>
+      </select>
+
+      <select id="book-select" aria-label="Book"></select>
+      <select id="chapter-select" aria-label="Chapter"></select>
+
+      <button type="button" class="nav-btn" id="prev-btn" aria-label="Previous chapter">‹</button>
+      <button type="button" class="nav-btn" id="next-btn" aria-label="Next chapter">›</button>
+    </div>
+
+    <div class="passage-header">
+      <h1 id="passage-title">Genesis 1</h1>
+      <div class="trans-label" id="passage-trans">King James Version · Public Domain</div>
+    </div>
+
+    <div id="passage-body">
+      <div class="loading-state">Loading…</div>
+    </div>
+
+    <aside class="chapter-commentary" id="chapter-commentary" hidden>
+      <div class="chapter-commentary-head">
+        <span class="label">Chapter commentary</span>
+        <span class="voice-name" id="comm-voice-name"></span>
+        <span class="voice-work" id="comm-voice-work"></span>
+      </div>
+      <div class="chapter-commentary-body">
+        <p id="comm-text"></p>
+        <p class="chapter-commentary-cite" id="comm-cite"></p>
+      </div>
+    </aside>
+    <p class="chapter-commentary-empty" id="chapter-commentary-empty" hidden>
+      No archived public-domain commentary for this chapter yet. Many New Testament chapters and a growing Old Testament set (Genesis, Psalms, prophets, and more) carry Chrysostom, Augustine, and other classical voices.
+    </p>
+
+    <div class="chapter-footer-nav">
+      <button type="button" id="footer-prev">‹ Previous</button>
+      <button type="button" id="footer-next">Next ›</button>
+    </div>
+
+    <p class="pd-note">
+      All translations shown here are in the public domain. Text is fetched from
+      <a href="https://bible-api.com/" target="_blank" rel="noopener">bible-api.com</a>
+      (open data). Melius Illuminare does not reproduce copyrighted modern translations.
+      For the site’s full sourcing policy see <a href="../about.html">About</a>.
+      <br><br>
+      <strong>Chapter commentary:</strong> Old and New Testament chapters show a primary
+      public-domain voice (Chrysostom, Augustine, Athanasius, and others) in the panel above.
+      See the <a href="commentary.html">commentary index</a> for coverage.
+      Also in this library: the <a href="summa.html">Summa Theologiae</a> (Dominican Fathers) · <a href="work.html?id=aquinas-contra-gentiles">Summa Contra Gentiles</a> (Rickaby).
+    </p>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>Sacred Texts Library · Public-domain translations only · <a href="summa.html">Summa Theologiae</a> · <a href="work.html?id=aquinas-contra-gentiles">Contra Gentiles</a> · <a href="../about.html">Sourcing policy</a></p>
+</footer>
+
+<script src="../js/nt-commentary.js"></script>
+<script src="../js/ot-commentary.js"></script>
+<script src="../js/pivotal-moments-data.js"></script>
+<script src="../js/pivotal-moments.js"></script>
+<script>
+/* ========== Complete Protestant canon book list with chapter counts ========== */
+const BOOKS = [
+  // Old Testament
+  { id: 'GEN', name: 'Genesis',           chapters: 50, testament: 'ot' },
+  { id: 'EXO', name: 'Exodus',            chapters: 40, testament: 'ot' },
+  { id: 'LEV', name: 'Leviticus',         chapters: 27, testament: 'ot' },
+  { id: 'NUM', name: 'Numbers',           chapters: 36, testament: 'ot' },
+  { id: 'DEU', name: 'Deuteronomy',       chapters: 34, testament: 'ot' },
+  { id: 'JOS', name: 'Joshua',            chapters: 24, testament: 'ot' },
+  { id: 'JDG', name: 'Judges',            chapters: 21, testament: 'ot' },
+  { id: 'RUT', name: 'Ruth',              chapters: 4,  testament: 'ot' },
+  { id: '1SA', name: '1 Samuel',          chapters: 31, testament: 'ot' },
+  { id: '2SA', name: '2 Samuel',          chapters: 24, testament: 'ot' },
+  { id: '1KI', name: '1 Kings',           chapters: 22, testament: 'ot' },
+  { id: '2KI', name: '2 Kings',           chapters: 25, testament: 'ot' },
+  { id: '1CH', name: '1 Chronicles',      chapters: 29, testament: 'ot' },
+  { id: '2CH', name: '2 Chronicles',      chapters: 36, testament: 'ot' },
+  { id: 'EZR', name: 'Ezra',              chapters: 10, testament: 'ot' },
+  { id: 'NEH', name: 'Nehemiah',          chapters: 13, testament: 'ot' },
+  { id: 'EST', name: 'Esther',            chapters: 10, testament: 'ot' },
+  { id: 'JOB', name: 'Job',               chapters: 42, testament: 'ot' },
+  { id: 'PSA', name: 'Psalms',            chapters: 150,testament: 'ot' },
+  { id: 'PRO', name: 'Proverbs',          chapters: 31, testament: 'ot' },
+  { id: 'ECC', name: 'Ecclesiastes',      chapters: 12, testament: 'ot' },
+  { id: 'SNG', name: 'Song of Solomon',   chapters: 8,  testament: 'ot' },
+  { id: 'ISA', name: 'Isaiah',            chapters: 66, testament: 'ot' },
+  { id: 'JER', name: 'Jeremiah',          chapters: 52, testament: 'ot' },
+  { id: 'LAM', name: 'Lamentations',      chapters: 5,  testament: 'ot' },
+  { id: 'EZK', name: 'Ezekiel',           chapters: 48, testament: 'ot' },
+  { id: 'DAN', name: 'Daniel',            chapters: 12, testament: 'ot' },
+  { id: 'HOS', name: 'Hosea',             chapters: 14, testament: 'ot' },
+  { id: 'JOL', name: 'Joel',              chapters: 3,  testament: 'ot' },
+  { id: 'AMO', name: 'Amos',              chapters: 9,  testament: 'ot' },
+  { id: 'OBA', name: 'Obadiah',           chapters: 1,  testament: 'ot' },
+  { id: 'JON', name: 'Jonah',             chapters: 4,  testament: 'ot' },
+  { id: 'MIC', name: 'Micah',             chapters: 7,  testament: 'ot' },
+  { id: 'NAM', name: 'Nahum',             chapters: 3,  testament: 'ot' },
+  { id: 'HAB', name: 'Habakkuk',          chapters: 3,  testament: 'ot' },
+  { id: 'ZEP', name: 'Zephaniah',         chapters: 3,  testament: 'ot' },
+  { id: 'HAG', name: 'Haggai',            chapters: 2,  testament: 'ot' },
+  { id: 'ZEC', name: 'Zechariah',         chapters: 14, testament: 'ot' },
+  { id: 'MAL', name: 'Malachi',           chapters: 4,  testament: 'ot' },
+  // New Testament
+  { id: 'MAT', name: 'Matthew',           chapters: 28, testament: 'nt' },
+  { id: 'MRK', name: 'Mark',              chapters: 16, testament: 'nt' },
+  { id: 'LUK', name: 'Luke',              chapters: 24, testament: 'nt' },
+  { id: 'JHN', name: 'John',              chapters: 21, testament: 'nt' },
+  { id: 'ACT', name: 'Acts',              chapters: 28, testament: 'nt' },
+  { id: 'ROM', name: 'Romans',            chapters: 16, testament: 'nt' },
+  { id: '1CO', name: '1 Corinthians',     chapters: 16, testament: 'nt' },
+  { id: '2CO', name: '2 Corinthians',     chapters: 13, testament: 'nt' },
+  { id: 'GAL', name: 'Galatians',         chapters: 6,  testament: 'nt' },
+  { id: 'EPH', name: 'Ephesians',         chapters: 6,  testament: 'nt' },
+  { id: 'PHP', name: 'Philippians',       chapters: 4,  testament: 'nt' },
+  { id: 'COL', name: 'Colossians',        chapters: 4,  testament: 'nt' },
+  { id: '1TH', name: '1 Thessalonians',   chapters: 5,  testament: 'nt' },
+  { id: '2TH', name: '2 Thessalonians',   chapters: 3,  testament: 'nt' },
+  { id: '1TI', name: '1 Timothy',         chapters: 6,  testament: 'nt' },
+  { id: '2TI', name: '2 Timothy',         chapters: 4,  testament: 'nt' },
+  { id: 'TIT', name: 'Titus',             chapters: 3,  testament: 'nt' },
+  { id: 'PHM', name: 'Philemon',          chapters: 1,  testament: 'nt' },
+  { id: 'HEB', name: 'Hebrews',           chapters: 13, testament: 'nt' },
+  { id: 'JAS', name: 'James',             chapters: 5,  testament: 'nt' },
+  { id: '1PE', name: '1 Peter',           chapters: 5,  testament: 'nt' },
+  { id: '2PE', name: '2 Peter',           chapters: 3,  testament: 'nt' },
+  { id: '1JN', name: '1 John',            chapters: 5,  testament: 'nt' },
+  { id: '2JN', name: '2 John',            chapters: 1,  testament: 'nt' },
+  { id: '3JN', name: '3 John',            chapters: 1,  testament: 'nt' },
+  { id: 'JUD', name: 'Jude',              chapters: 1,  testament: 'nt' },
+  { id: 'REV', name: 'Revelation',        chapters: 22, testament: 'nt' },
+];
+
+const TRANS_NAMES = {
+  kjv: 'King James Version',
+  asv: 'American Standard Version',
+  dra: 'Douay-Rheims (1899 American Edition)'
+};
+
+let state = {
+  translation: 'kjv',
+  bookIndex: 0,
+  chapter: 1
+  , targetVerse: null
+};
+
+function buildBookLists() {
+  const ot = document.getElementById('ot-books');
+  const nt = document.getElementById('nt-books');
+  const bookSelect = document.getElementById('book-select');
+  ot.innerHTML = '';
+  nt.innerHTML = '';
+  bookSelect.innerHTML = '';
+
+  BOOKS.forEach((book, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'book-btn' + (i === state.bookIndex ? ' active' : '');
+    btn.textContent = book.name;
+    btn.dataset.index = i;
+    btn.addEventListener('click', () => {
+      state.bookIndex = i;
+      state.chapter = 1;
+      closeMobileSidebar();
+      updateChapterSelect();
+      loadPassage();
+      highlightActiveBook();
+    });
+    (book.testament === 'ot' ? ot : nt).appendChild(btn);
+
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = book.name;
+    if (i === state.bookIndex) opt.selected = true;
+    bookSelect.appendChild(opt);
+  });
+}
+
+function updateChapterSelect() {
+  const book = BOOKS[state.bookIndex];
+  const sel = document.getElementById('chapter-select');
+  sel.innerHTML = '';
+  for (let c = 1; c <= book.chapters; c++) {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    if (c === state.chapter) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  const isFirst = state.bookIndex === 0 && state.chapter === 1;
+  const isLast  = state.bookIndex === BOOKS.length - 1 && state.chapter === book.chapters;
+  document.getElementById('prev-btn').disabled = isFirst;
+  document.getElementById('footer-prev').disabled = isFirst;
+  document.getElementById('next-btn').disabled = isLast;
+  document.getElementById('footer-next').disabled = isLast;
+}
+
+function highlightActiveBook() {
+  document.querySelectorAll('.book-btn').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.index, 10) === state.bookIndex);
+  });
+  document.getElementById('book-select').value = state.bookIndex;
+}
+
+
+function commentaryKey(book, chapter) {
+  return book.id + '.' + chapter;
+}
+
+function updateChapterCommentary() {
+  const book = BOOKS[state.bookIndex];
+  const panel = document.getElementById('chapter-commentary');
+  const empty = document.getElementById('chapter-commentary-empty');
+  if (!panel || !empty) return;
+  const key = commentaryKey(book, state.chapter);
+  const data = (window.NT_COMMENTARY || {})[key] || (window.OT_COMMENTARY || {})[key];
+
+  if (!data) {
+    panel.hidden = true;
+    empty.hidden = false;
+    return;
+  }
+
+  empty.hidden = true;
+  panel.hidden = false;
+  const nameEl = document.getElementById('comm-voice-name');
+  const workEl = document.getElementById('comm-voice-work');
+  const textEl = document.getElementById('comm-text');
+  const citeEl = document.getElementById('comm-cite');
+  if (data.figureId) {
+    nameEl.innerHTML = '<a href="../figures/profile.html?id=' + encodeURIComponent(data.figureId) + '">' +
+      escapeHtml(data.name) + '</a>';
+  } else {
+    nameEl.textContent = data.name || '';
+  }
+  workEl.textContent = data.work || '';
+  textEl.textContent = data.text || '';
+  citeEl.textContent = (data.citation || '') + (data.translation ? ' · ' + data.translation : '');
+}
+
+async function loadPassage() {
+  const book = BOOKS[state.bookIndex];
+  const titleEl = document.getElementById('passage-title');
+  const transEl = document.getElementById('passage-trans');
+  const bodyEl  = document.getElementById('passage-body');
+
+  titleEl.textContent = book.name + ' ' + state.chapter;
+  transEl.textContent = TRANS_NAMES[state.translation] + ' · Public Domain';
+  bodyEl.innerHTML = '<div class="loading-state">Loading…</div>';
+  updateChapterCommentary();
+  if (typeof updatePivotalMoments === 'function') {
+    updatePivotalMoments(book.id, state.chapter);
+  }
+
+  history.replaceState(null, '', '#' + book.id + '.' + state.chapter + '.' + state.translation);
+
+  try {
+    const url = 'https://bible-api.com/data/' + state.translation + '/' + book.id + '/' + state.chapter;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    if (!data.verses || !data.verses.length) {
+      bodyEl.innerHTML = '<div class="error-state">No verses returned for this passage.</div>';
+      return;
+    }
+
+    const html = data.verses.map(function(v) {
+      const text = (v.text || '').replace(/\\n/g, ' ').trim();
+      const vn = v.verse;
+      return '<div class="verse-block" id="v' + vn + '" data-verse="' + vn + '"><span class="vnum">' + vn + '</span>' + escapeHtml(text) + '</div>';
+    }).join('');
+
+    bodyEl.innerHTML = html;
+    if (typeof updatePivotalMoments === 'function') {
+      updatePivotalMoments(book.id, state.chapter);
+    }
+    if (state.targetVerse != null) {
+      const tv = state.targetVerse;
+      state.targetVerse = null;
+      setTimeout(function () { scrollToVerse(tv); }, 80);
+    }
+  } catch (err) {
+    console.error(err);
+    bodyEl.innerHTML = '<div class="error-state">Could not load this chapter. Check your connection and try again.<br><small>' + escapeHtml(String(err.message)) + '</small></div>';
+  }
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function scrollToVerse(num) {
+  const el = document.getElementById('v' + num);
+  if (!el) return;
+  el.classList.add('is-target');
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(function () { el.classList.add('fade'); }, 2200);
+  setTimeout(function () { el.classList.remove('is-target', 'fade'); }, 4500);
+}
+
+function goPrev() {
+  if (state.chapter > 1) {
+    state.chapter--;
+  } else if (state.bookIndex > 0) {
+    state.bookIndex--;
+    state.chapter = BOOKS[state.bookIndex].chapters;
+  } else return;
+  updateChapterSelect();
+  highlightActiveBook();
+  loadPassage();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goNext() {
+  const book = BOOKS[state.bookIndex];
+  if (state.chapter < book.chapters) {
+    state.chapter++;
+  } else if (state.bookIndex < BOOKS.length - 1) {
+    state.bookIndex++;
+    state.chapter = 1;
+  } else return;
+  updateChapterSelect();
+  highlightActiveBook();
+  loadPassage();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function closeMobileSidebar() {
+  document.getElementById('bible-sidebar').classList.remove('open');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const hash = location.hash.slice(1);
+  if (hash) {
+    const parts = hash.split('.');
+    const bookId = (parts[0] || '').toUpperCase();
+    const ch = parseInt(parts[1], 10);
+    // Support BOOK.chapter.verse and BOOK.chapter.verse.translation
+    // Also legacy BOOK.chapter.translation when third part is a known translation key
+    let verse = null;
+    let tr = 'kjv';
+    if (parts.length >= 3) {
+      const p2 = (parts[2] || '').toLowerCase();
+      if (TRANS_NAMES[p2]) {
+        tr = p2;
+      } else if (/^\d+$/.test(parts[2])) {
+        verse = parseInt(parts[2], 10);
+        if (parts[3] && TRANS_NAMES[(parts[3] || '').toLowerCase()]) {
+          tr = (parts[3] || '').toLowerCase();
+        }
+      }
+    }
+    const idx = BOOKS.findIndex(function(b) { return b.id === bookId; });
+    if (idx >= 0) state.bookIndex = idx;
+    if (ch >= 1 && ch <= BOOKS[state.bookIndex].chapters) state.chapter = ch;
+    if (TRANS_NAMES[tr]) state.translation = tr;
+    if (verse != null && verse >= 1) state.targetVerse = verse;
+  }
+
+  document.getElementById('translation-select').value = state.translation;
+
+  buildBookLists();
+  updateChapterSelect();
+  highlightActiveBook();
+  loadPassage();
+
+  document.getElementById('translation-select').addEventListener('change', function(e) {
+    state.translation = e.target.value;
+    loadPassage();
+  });
+  document.getElementById('book-select').addEventListener('change', function(e) {
+    state.bookIndex = parseInt(e.target.value, 10);
+    state.chapter = 1;
+    updateChapterSelect();
+    highlightActiveBook();
+    loadPassage();
+  });
+  document.getElementById('chapter-select').addEventListener('change', function(e) {
+    state.chapter = parseInt(e.target.value, 10);
+    loadPassage();
+  });
+  document.getElementById('prev-btn').addEventListener('click', goPrev);
+  document.getElementById('next-btn').addEventListener('click', goNext);
+  document.getElementById('footer-prev').addEventListener('click', goPrev);
+  document.getElementById('footer-next').addEventListener('click', goNext);
+
+
+  document.getElementById('mobile-books-btn').addEventListener('click', function() {
+    document.getElementById('bible-sidebar').classList.add('open');
+  });
+});
+</script>
+<script src="../js/site-nav.js"></script>
+<script src="../js/ambient-dust.js"></script>
+<script src="../js/epic-reveal.js"></script>
+
+</body>
+</html>

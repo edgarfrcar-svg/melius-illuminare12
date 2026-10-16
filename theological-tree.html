@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Theological Tree — Melius Illuminare</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/site-polish.css">
+  <link rel="stylesheet" href="css/mobile.css">
+  <link rel="stylesheet" href="css/sacred-objects.css">
+</head>
+<body>
+  <header class="site-header">
+    <a href="index.html" class="wordmark">MELIUS ILLUMINARE</a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="figures.html">Figures</a>
+      <a href="concepts.html">Concepts</a>
+      <a href="magisterium.html">Magisterium</a>
+      <a href="papacy.html">Papacy</a>
+      <a href="prayer.html">Prayer</a>
+      <a href="mass.html">Mass</a>
+      <a href="spiritualities.html">Spiritualities</a>
+      <a href="theological-tree.html" class="active">Theological Tree</a>
+      <a href="texts/bible.html">Sacred Texts</a>
+      <a href="store.html">Store</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="page-hero tree-hero">
+      <div class="hero-inner">
+        <span class="hero-eyebrow">Intellectual Genealogy</span>
+        <h1>Theological Trees</h1>
+        <p class="hero-lede">Browse the major doctrinal families individually — Grace, Justification, and the Eucharist.</p>
+      </div>
+    </section>
+
+    <!-- Workspace -->
+    <section class="tree-workspace">
+      <!-- Toolbar -->
+      <div class="tree-toolbar">
+        <div class="tb-group tree-category-picker" role="group" aria-label="Theological tree categories">
+          <span class="tb-label">Category</span>
+          <button class="category-btn is-active" data-category="grace" type="button">Grace</button>
+          <button class="category-btn" data-category="justification" type="button">Justification</button>
+          <button class="category-btn" data-category="eucharist" type="button">Eucharist</button>
+          <button class="category-btn" data-category="atonement" type="button">Atonement</button>
+          <button class="category-btn" data-category="church" type="button">Church</button>
+          <button class="category-btn" data-category="baptism" type="button">Baptism</button>
+          <button class="category-btn" data-category="trinity" type="button">Trinity</button>
+          <button class="category-btn" data-category="original_sin" type="button">Original Sin</button>
+          <button class="category-btn" data-category="predestination" type="button">Predestination</button>
+        </div>
+
+
+        <div class="tb-spacer"></div>
+
+        <button id="focus-toggle" class="focus-toggle" type="button">Focus Mode</button>
+        <button id="reset-btn" class="reset-btn" type="button">Reset View</button>
+
+        <details class="filter-panel">
+          <summary>Show Relationships</summary>
+          <fieldset class="filter-list">
+            <label><input type="checkbox" class="filter-chk" data-group="development" checked> Development</label>
+            <label><input type="checkbox" class="filter-chk" data-group="opposition" checked> Opposition</label>
+            <label><input type="checkbox" class="filter-chk" data-group="controversy" checked> Controversies</label>
+            <label><input type="checkbox" class="filter-chk" data-group="influence" checked> Influence</label>
+            <label class="filter-secondary"><input type="checkbox" class="filter-chk" data-group="secondary"> Secondary links</label>
+          </fieldset>
+        </details>
+      </div>
+
+      <!-- Canvas + side panel -->
+      <div class="tree-stage">
+        <div id="tree-scroll" class="tree-canvas-scroll">
+          <div id="tree-viewport" class="tree-viewport">
+            <svg id="tree-svg" class="tree-svg-layer" viewBox="0 0 1200 2200"></svg>
+            <div id="tree-nodes" class="tree-nodes-layer"></div>
+          </div>
+          <div id="tree-tooltip" class="tree-tooltip" role="status" aria-live="polite"></div>
+        </div>
+
+        <aside id="tree-sidepanel" class="tree-sidepanel" aria-label="Entity details"></aside>
+      </div>
+
+      <p class="tree-hint">Click a node to focus · click a line for its relationship.</p>
+    </section>
+
+    <!-- Legend -->
+    <section class="tree-legend-wrap">
+      <div class="tree-legend">
+        <div class="legend-block">
+          <span class="legend-title">Entities</span>
+          <ul class="legend-nodes">
+            <li><span class="leg-dot leg-concept"></span>Concept</li>
+            <li><span class="leg-dot leg-figure"></span>Figure</li>
+            <li><span class="leg-dot leg-tradition"></span>Tradition</li>
+            <li><span class="leg-dot leg-movement"></span>Movement</li>
+            <li><span class="leg-dot leg-event"></span>Controversy</li>
+          </ul>
+        </div>
+        <div class="legend-block">
+          <span class="legend-title">Relationships</span>
+          <ul class="legend-edges">
+            <li><span class="leg-line leg-lineage"></span>Lineage — development &amp; continuation</li>
+            <li><span class="leg-line leg-typology"></span>Foreshadowed — type and fulfillment</li>
+            <li><span class="leg-line leg-conflict"></span>Conflict — opposition &amp; controversy</li>
+            <li><span class="leg-line leg-judgment"></span>Judgment — affirmation &amp; rejection</li>
+          </ul>
+        </div>
+      </div>
+      <p class="legend-note">The default view shows the clean structural tree; typed relationships are revealed through focus and filtering.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-wordmark">MELIUS ILLUMINARE</p>
+      <p class="footer-note">A digital archive of Christian theological thought.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/tree-data.js"></script>
+  <script src="js/tree.js"></script>
+<script src="js/site-nav.js"></script>
+<script src="js/ambient-dust.js"></script>
+<script src="js/epic-reveal.js"></script>
+
+</body>
+</html>

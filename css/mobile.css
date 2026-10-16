@@ -1,0 +1,527 @@
+/* ========== Mobile usability — Melius Illuminare ========== */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+img, video, svg, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Touch-friendly targets */
+@media (max-width: 900px) {
+  a, button, .book-btn, .filter-chip, .mass-form-tab, .litcal-rite-btn, .rosary-nav-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .filter-chip, .mass-form-tab, .litcal-rite-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 0.9rem !important;
+  }
+
+  /* Header */
+  .site-header {
+    padding: 0.65rem 0.9rem !important;
+    gap: 0.5rem !important;
+  }
+  .site-header .wordmark {
+    font-size: 0.78rem !important;
+    letter-spacing: 0.12em !important;
+    max-width: calc(100vw - 5.5rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .season-toggle {
+    display: none !important;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 70vh !important;
+  }
+  .hero-content {
+    padding: 0 1rem !important;
+  }
+  .hero-content h1 {
+    font-size: clamp(1.85rem, 9vw, 2.6rem) !important;
+    line-height: 1.15 !important;
+  }
+  .lede {
+    font-size: 1rem !important;
+  }
+  .cta-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+  .cta-row .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Sections */
+  .section {
+    padding: 2.5rem 1rem !important;
+  }
+  .section-head {
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Grids → single column */
+  .tradition-grid,
+  .start-here-grid,
+  .concept-grid,
+  .figures-grid,
+  .store-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+  .concept-grid {
+    padding: 0 0.25rem;
+  }
+  .concept-card {
+    min-height: 11rem !important;
+  }
+  .concept-card-summary {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Filters / chips: horizontal scroll instead of wrapping chaos */
+  .filter-row,
+  .era-filters,
+  .figures-filters,
+  .mass-form-switch {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.5rem !important;
+    padding-bottom: 0.35rem;
+    scrollbar-width: thin;
+    max-width: 100%;
+  }
+  .filter-row::-webkit-scrollbar,
+  .era-filters::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  /* Concept exhibit */
+  .exhibit-hero {
+    min-height: 16rem !important;
+    padding: 1.25rem 1rem 1.5rem !important;
+  }
+  .exhibit-hero h1 {
+    font-size: clamp(1.75rem, 8vw, 2.4rem) !important;
+  }
+  .exhibit-section {
+    padding: 1.5rem 1rem !important;
+  }
+  .exhibit-q-grid,
+  .exhibit-answer-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .exhibit-progress {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap !important;
+    gap: 0.75rem !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.72rem !important;
+  }
+  .exhibit-progress a {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Figures */
+  .fp-layout,
+  .figures-layout {
+    display: block !important;
+  }
+  .fp-nav {
+    position: static !important;
+    max-height: none !important;
+    margin-bottom: 1rem;
+  }
+  .portrait-row,
+  .figure-meta {
+    flex-wrap: wrap;
+  }
+
+  /* Mass + liturgical calendar */
+  .litcal {
+    padding: 0 0.75rem !important;
+  }
+  .litcal-inner {
+    padding: 1rem 0.85rem 1.15rem !important;
+  }
+  .litcal-today {
+    grid-template-columns: 1fr 2.75rem !important;
+    gap: 0.65rem !important;
+  }
+  .litcal-today h3 {
+    font-size: 1.05rem !important;
+  }
+  .litcal-week {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+  }
+  .litcal-day {
+    min-height: 4.5rem !important;
+  }
+  .mass-part-card {
+    min-width: min(85vw, 280px) !important;
+  }
+  .mass-scroll-track {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* Bible */
+  .bible-app {
+    grid-template-columns: 1fr !important;
+  }
+  .bible-sidebar {
+    display: none;
+  }
+  .bible-sidebar.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: var(--bg-deep, #0a0b10);
+    overflow-y: auto;
+    padding: 1.25rem;
+  }
+  .bible-main {
+    padding: 1rem 0.9rem 3rem !important;
+    max-width: 100% !important;
+  }
+  .bible-toolbar {
+    gap: 0.45rem !important;
+  }
+  .bible-toolbar select,
+  .bible-toolbar button {
+    font-size: 0.9rem !important;
+    max-width: 100%;
+  }
+  .bible-toolbar select {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .passage-header h1 {
+    font-size: 1.35rem !important;
+  }
+  .chapter-commentary {
+    padding: 1rem !important;
+  }
+
+  /* Rosary */
+  .rosary-stage {
+    grid-template-columns: 1fr !important;
+  }
+  .rosary-toolbar {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+  .rosary-mystery-btns,
+  .rosary-lang-btns {
+    flex-wrap: wrap;
+  }
+
+  /* Theological tree */
+  .tree-canvas-scroll,
+  .tree-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100vw;
+  }
+
+  /* Tables */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  /* Store */
+  .store-category-card,
+  .store-genre-card {
+    min-height: auto !important;
+    padding: 1.25rem 1rem !important;
+  }
+
+  /* Footer */
+  .site-footer {
+    padding: 1.75rem 1rem !important;
+  }
+
+  /* Prevent fixed elements from covering content */
+  main, .section, .exhibit-section, .bible-main {
+    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 480px) {
+  .site-header .wordmark {
+    font-size: 0.7rem !important;
+  }
+  .litcal-week {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .hero {
+    min-height: 62vh !important;
+  }
+}
+
+/* Prefer reduced motion already handled elsewhere; keep taps instant */
+@media (hover: none) {
+  .concept-card:hover,
+  .tradition-card:hover {
+    transform: none;
+  }
+}
+
+/* ========== Figures directory + profile (mobile) ========== */
+@media (max-width: 900px) {
+  .figures-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: auto !important;
+    max-width: 100% !important;
+  }
+
+  /* List pane: compact, scrollable, doesn't eat the whole screen */
+  .figures-list-pane {
+    position: relative !important;
+    top: auto !important;
+    max-height: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--hairline, rgba(236,229,212,0.12));
+    flex: 0 0 auto;
+  }
+  .list-controls {
+    padding: 0.75rem 0.9rem 0.6rem !important;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg-deep, #08090e);
+  }
+  .list-controls input[type="search"] {
+    font-size: 16px !important; /* prevent iOS zoom */
+    min-height: 44px;
+    padding: 0.65rem 0.85rem !important;
+  }
+  .filter-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.4rem !important;
+    padding-bottom: 0.35rem;
+    margin: 0 -0.15rem;
+  }
+  .filter-chip {
+    flex: 0 0 auto;
+    min-height: 40px !important;
+    padding: 0.45rem 0.85rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Figure rows: larger tap targets */
+  .figures-list {
+    max-height: 38vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  .figure-row {
+    padding: 0.85rem 1rem !important;
+    min-height: 56px;
+    gap: 0.75rem !important;
+  }
+  .figure-row .mini-portrait {
+    width: 48px !important;
+    height: 48px !important;
+  }
+  .figure-row .row-text {
+    min-width: 0;
+  }
+  .figure-row .row-name {
+    font-size: 1rem !important;
+    line-height: 1.25;
+  }
+  .figure-row .row-meta {
+    font-size: 0.78rem !important;
+    opacity: 0.85;
+  }
+
+  /* Detail pane full width below list */
+  .figures-detail-pane,
+  .figures-preview,
+  .detail-pane {
+    padding: 1rem 0.9rem 2.5rem !important;
+    max-width: 100% !important;
+  }
+  .figures-detail-pane h1,
+  .detail-pane h1,
+  .preview-name {
+    font-size: clamp(1.45rem, 6.5vw, 1.9rem) !important;
+  }
+  .preview-portrait,
+  .detail-portrait {
+    width: min(42vw, 140px) !important;
+    height: min(42vw, 140px) !important;
+    margin: 0 auto 1rem !important;
+  }
+  .detail-actions,
+  .preview-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    width: 100%;
+  }
+  .detail-actions a,
+  .detail-actions button,
+  .preview-actions a,
+  .preview-actions .btn {
+    width: 100%;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Profile page (fp-*) */
+  .fp-shell {
+    padding: 0 !important;
+  }
+  .fp-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 0.9rem 3rem !important;
+    gap: 1.25rem !important;
+  }
+  .fp-main {
+    order: 1 !important;
+    width: 100% !important;
+  }
+  .fp-nav {
+    order: 2 !important;
+    position: static !important;
+    max-height: none !important;
+    width: 100% !important;
+    border: 1px solid rgba(201, 162, 39, 0.18);
+    border-radius: 8px;
+    padding: 0.85rem 1rem !important;
+    background: rgba(12, 14, 20, 0.6);
+  }
+  .fp-nav-list a {
+    min-height: 44px;
+    display: flex !important;
+    align-items: center;
+    padding: 0.55rem 0.35rem !important;
+  }
+  .fp-hero {
+    padding: 1.5rem 0.25rem 1.25rem !important;
+    text-align: center;
+  }
+  .fp-hero h1 {
+    font-size: clamp(1.6rem, 7vw, 2.2rem) !important;
+  }
+  .fp-portrait,
+  .fp-hero .portrait-wrap,
+  .fp-hero-portrait {
+    width: min(48vw, 160px) !important;
+    height: min(48vw, 160px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .fp-section,
+  .fp-block {
+    padding: 1.15rem 0 !important;
+  }
+  .fp-section h2 {
+    font-size: 1.15rem !important;
+  }
+  .fp-grid-2,
+  .fp-ideas-grid,
+  .fp-works-list,
+  .fp-meta-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  .fp-context-banner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+    padding: 0.75rem 0.9rem !important;
+    font-size: 0.9rem;
+  }
+  .fp-context-banner button {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  /* Idea / opinion / central-answer subpages */
+  .idea-page,
+  .opinion-page,
+  .central-answer-page {
+    padding: 1.25rem 0.9rem 3rem !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .figures-list {
+    max-height: 34vh;
+  }
+  .figure-row .row-meta {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Profile hero full-bleed without horizontal page scroll */
+@media (max-width: 900px) {
+  .fp-hero {
+    margin-left: -0.9rem !important;
+    margin-right: -0.9rem !important;
+    width: calc(100% + 1.8rem) !important;
+    max-width: 100vw;
+    overflow: hidden !important;
+    padding: 1.75rem 0.9rem 1.5rem !important;
+  }
+  .fp-hero .fp-ornament-a {
+    width: 120vw !important;
+    height: 120vw !important;
+    top: -40vw !important;
+  }
+  .fp-hero .fp-ornament-b {
+    width: 90vw !important;
+    height: 120px !important;
+  }
+  /* When portrait is full-bleed image block */
+  .fp-hero .fp-portrait {
+    max-height: 42vh;
+  }
+  .fp-hero .fp-portrait img {
+    object-position: center top;
+  }
+}

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summa Contra Gentiles — Melius Illuminare</title>
+<meta name="description" content="Read the Summa Contra Gentiles (Of God and His Creatures) by St Thomas Aquinas. Joseph Rickaby translation.">
+<link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/site-polish.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+  <link rel="stylesheet" href="../css/sacred-objects.css">
+<style>
+  .scg-app {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    min-height: calc(100vh - 140px);
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  @media (max-width: 900px) {
+    .scg-app { grid-template-columns: 1fr; }
+    .scg-sidebar { display: none; }
+    .scg-sidebar.open {
+      display: block; position: fixed; inset: 0; z-index: 80;
+      background: var(--bg-deep); overflow-y: auto; padding: 1.25rem;
+    }
+  }
+  .scg-sidebar {
+    border-right: 1px solid var(--hairline);
+    background: var(--bg-deep);
+    padding: 1.1rem 0.85rem 2rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 70px);
+    position: sticky;
+    top: 70px;
+  }
+  .scg-sidebar .side-title {
+    font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold-glow); padding: 0.3rem 0.5rem; margin-bottom: 0.6rem;
+  }
+  .book-btn, .ch-btn {
+    display: block; width: 100%; text-align: left;
+    background: none; border: none;
+    font-family: var(--serif-body); cursor: pointer; border-radius: 3px;
+  }
+  .book-btn {
+    color: var(--ink); font-size: 0.92rem;
+    padding: 0.45rem 0.55rem; margin-top: 0.5rem;
+  }
+  .book-btn:hover, .book-btn.active {
+    background: rgba(201,162,39,0.1); color: var(--gold-glow);
+  }
+  .ch-btn {
+    color: var(--ink-dim); font-size: 0.82rem;
+    padding: 0.28rem 0.55rem 0.28rem 1rem;
+  }
+  .ch-btn:hover, .ch-btn.active {
+    color: var(--gold-glow); background: rgba(236,229,212,0.05);
+  }
+  .scg-main { padding: 1.5rem 2rem 4rem; max-width: 760px; }
+  @media (max-width: 900px) { .scg-main { padding: 1rem 1.1rem 3rem; } }
+  .scg-toolbar {
+    display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;
+    margin-bottom: 1.4rem; padding-bottom: 1rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .scg-toolbar button {
+    font-family: var(--serif-body); font-size: 0.9rem;
+    background: var(--bg-panel); color: var(--ink);
+    border: 1px solid var(--hairline); padding: 0.45rem 0.75rem;
+    border-radius: 3px; cursor: pointer;
+  }
+  .scg-toolbar button:hover { border-color: var(--gold-glow); color: var(--gold-glow); }
+  .chapter-title {
+    font-family: var(--serif-display); font-size: 1.45rem;
+    color: var(--gold-glow); margin: 0 0 1rem; line-height: 1.3;
+  }
+  .chapter-body p {
+    font-family: var(--serif-body); font-size: 1.05rem;
+    line-height: 1.7; color: var(--ink); margin: 0 0 1rem;
+  }
+  .book-label {
+    font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-dim); margin-bottom: 0.35rem;
+  }
+  .nav-row { display: flex; gap: 0.75rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--hairline); }
+  .nav-row button { flex: 1; }
+  #menu-toggle { display: none; }
+  @media (max-width: 900px) { #menu-toggle { display: inline-block; } }
+</style>
+
+<style>
+  .summa-article, .scg-article, .article-body, .qa-body {
+    font-family: var(--serif-body);
+    font-size: 1.1rem;
+    line-height: 1.75;
+    color: #e4dcc8;
+    max-width: 40rem;
+  }
+  .summa-article p, .scg-article p, .article-body p {
+    margin: 0 0 1.05em;
+  }
+  .summa-main, .scg-main, .reader-main {
+    padding: 1.5rem 1.75rem 4rem;
+  }
+  .obj, .sed-contra, .respondeo, .ad {
+    margin: 1.15em 0;
+    padding-left: 0.75rem;
+    border-left: 2px solid rgba(201,162,39,0.25);
+  }
+  .respondeo {
+    border-left-color: rgba(201,162,39,0.55);
+    background: rgba(201,162,39,0.04);
+    padding: 0.85rem 1rem;
+    border-radius: 0 8px 8px 0;
+  }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html" class="wordmark">MELIUS ILLUMINARE</a>
+  <nav>
+    <a href="../figures.html">Figures</a>
+    <a href="../concepts.html">Concepts</a>
+    <a href="bible.html">Sacred Texts</a>
+    <a href="summa.html">Summa Theologiae</a>
+    <a href="scg.html" class="active">Contra Gentiles</a>
+    <a href="../store.html">Store</a>
+      <a href="../about.html">About</a>
+  </nav>
+</header>
+
+<div class="scg-app">
+  <aside class="scg-sidebar" id="sidebar">
+    <div class="side-title">Summa Contra Gentiles</div>
+    <div id="book-list"></div>
+  </aside>
+  <main class="scg-main">
+    <div class="scg-toolbar">
+      <button id="menu-toggle" type="button">Menu</button>
+      <button id="prev-btn" type="button">← Previous</button>
+      <button id="next-btn" type="button">Next →</button>
+    </div>
+    <div class="book-label" id="book-label"></div>
+    <h1 class="chapter-title" id="chapter-title">Loading…</h1>
+    <div class="chapter-body" id="chapter-body"></div>
+    <div class="nav-row">
+      <button id="prev-btn2" type="button">← Previous</button>
+      <button id="next-btn2" type="button">Next →</button>
+    </div>
+  </main>
+</div>
+
+<script src="../js/scg-data.js"></script>
+<script>
+(function () {
+  const DATA = window.SCG_DATA;
+  if (!DATA || !DATA.books) {
+    document.getElementById("chapter-title").textContent = "Data failed to load.";
+    return;
+  }
+  const state = { bookIdx: 0, chIdx: 0 };
+
+  function currentBook() { return DATA.books[state.bookIdx]; }
+  function currentCh() { return currentBook().chapters[state.chIdx]; }
+
+  function renderSidebar() {
+    const list = document.getElementById("book-list");
+    list.innerHTML = "";
+    DATA.books.forEach((book, bi) => {
+      const bbtn = document.createElement("button");
+      bbtn.className = "book-btn" + (bi === state.bookIdx ? " active" : "");
+      bbtn.textContent = book.label.replace(/\s+/g, " ").trim();
+      bbtn.onclick = () => { state.bookIdx = bi; state.chIdx = 0; render(); };
+      list.appendChild(bbtn);
+      if (bi === state.bookIdx) {
+        book.chapters.forEach((ch, ci) => {
+          const cbtn = document.createElement("button");
+          cbtn.className = "ch-btn" + (ci === state.chIdx ? " active" : "");
+          cbtn.textContent = ch.title.length > 55 ? ch.title.slice(0, 52) + "…" : ch.title;
+          cbtn.title = ch.title;
+          cbtn.onclick = () => { state.chIdx = ci; render(); };
+          list.appendChild(cbtn);
+        });
+      }
+    });
+  }
+
+  function renderMain() {
+    const book = currentBook();
+    const ch = currentCh();
+    document.getElementById("book-label").textContent = book.label.replace(/\s+/g, " ").trim();
+    document.getElementById("chapter-title").textContent = ch.title;
+    const body = document.getElementById("chapter-body");
+    body.innerHTML = ch.paragraphs.map(p => "<p>" + p + "</p>").join("");
+  }
+
+  function render() {
+    renderSidebar();
+    renderMain();
+    document.getElementById("sidebar").classList.remove("open");
+  }
+
+  function prev() {
+    if (state.chIdx > 0) state.chIdx--;
+    else if (state.bookIdx > 0) {
+      state.bookIdx--;
+      state.chIdx = currentBook().chapters.length - 1;
+    }
+    render();
+    window.scrollTo(0, 0);
+  }
+  function next() {
+    const book = currentBook();
+    if (state.chIdx < book.chapters.length - 1) state.chIdx++;
+    else if (state.bookIdx < DATA.books.length - 1) {
+      state.bookIdx++;
+      state.chIdx = 0;
+    }
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  document.getElementById("prev-btn").onclick = prev;
+  document.getElementById("next-btn").onclick = next;
+  document.getElementById("prev-btn2").onclick = prev;
+  document.getElementById("next-btn2").onclick = next;
+  document.getElementById("menu-toggle").onclick = () => {
+    document.getElementById("sidebar").classList.toggle("open");
+  };
+
+  render();
+})();
+</script>
+<script src="../js/site-nav.js"></script>
+<script src="../js/ambient-dust.js"></script>
+<script src="../js/epic-reveal.js"></script>
+
+</body>
+</html>

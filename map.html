@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theological Map &mdash; Melius Illuminare</title>
+<link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/site-polish.css">
+  <link rel="stylesheet" href="css/mobile.css">
+  <link rel="stylesheet" href="css/sacred-objects.css">
+<style>
+  .map-hero {
+    text-align: center;
+    padding: 3.5rem 1.5rem 2rem;
+    border-bottom: 1px solid var(--hairline);
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(201,162,39,0.08), transparent 55%);
+  }
+  .map-hero .eyebrow {
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    color: var(--gold-glow);
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+  .map-hero h1 {
+    font-size: clamp(1.7rem, 4vw, 2.4rem);
+    margin: 0 0 0.6rem;
+  }
+  .map-hero .lede {
+    max-width: 36rem;
+    margin: 0 auto;
+    color: var(--ink-dim);
+    font-size: 1.05rem;
+  }
+
+  .map-layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* Concept picker */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.6rem;
+    margin: 1.5rem 0 2.5rem;
+  }
+  .concept-chip {
+    font-family: var(--serif-body);
+    font-size: 0.95rem;
+    background: var(--bg-panel);
+    color: var(--ink-dim);
+    border: 1px solid var(--hairline);
+    padding: 0.55rem 0.7rem;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .concept-chip:hover {
+    color: var(--gold-glow);
+    border-color: var(--gold);
+  }
+  .concept-chip.active {
+    color: var(--bg-deep);
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  /* Concept header */
+  .concept-header {
+    margin-bottom: 2rem;
+  }
+  .concept-header h2 {
+    font-size: 1.6rem;
+    margin: 0 0 0.4rem;
+    color: var(--gold-glow);
+  }
+  .concept-header .short {
+    font-style: italic;
+    color: var(--ink-dim);
+    margin: 0 0 0.8rem;
+  }
+  .concept-header .summary {
+    max-width: 42rem;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  /* Tabs */
+  .map-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1.8rem;
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 0.6rem;
+  }
+  .map-tab {
+    font-family: var(--serif-body);
+    font-size: 0.9rem;
+    background: transparent;
+    color: var(--ink-dim);
+    border: 1px solid transparent;
+    padding: 0.4rem 0.9rem;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .map-tab:hover { color: var(--gold-glow); }
+  .map-tab.active {
+    color: var(--gold-glow);
+    border-color: var(--gold);
+    background: rgba(201,162,39,0.08);
+  }
+
+  /* Lineage tree (simple vertical flow) */
+  .lineage-wrap {
+    overflow-x: auto;
+    padding: 0.5rem 0 1.5rem;
+  }
+  .lineage-tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    min-width: 280px;
+  }
+  .lineage-node {
+    position: relative;
+    text-align: center;
+    margin: 0.35rem 0;
+  }
+  .lineage-node .node-label {
+    display: inline-block;
+    padding: 0.45rem 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--hairline);
+    background: var(--bg-panel);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .lineage-node .node-label:hover {
+    border-color: var(--gold);
+    color: var(--gold-glow);
+  }
+  .lineage-node.root .node-label {
+    font-family: var(--serif-display);
+    letter-spacing: 0.08em;
+    color: var(--gold-glow);
+    border-color: var(--gold);
+    background: rgba(201,162,39,0.1);
+    cursor: default;
+  }
+  .lineage-node.era .node-label {
+    font-style: italic;
+    color: var(--ink-dim);
+    border-style: dashed;
+  }
+  .lineage-node.opponent .node-label {
+    border-color: rgba(180,80,80,0.5);
+    color: #d4a0a0;
+  }
+  .lineage-connector {
+    width: 1px;
+    height: 1.1rem;
+    background: var(--hairline);
+    margin: 0 auto;
+  }
+  .lineage-branch {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    margin: 0.4rem 0;
+  }
+  .lineage-branch .lineage-node { margin: 0.2rem; }
+
+  /* Position panel */
+  .position-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    padding: 1.5rem 1.6rem;
+    margin-top: 1.5rem;
+    display: none;
+  }
+  .position-panel.visible { display: block; }
+  .position-panel .eyebrow {
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    color: var(--gold-glow);
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+  .position-panel h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.35rem;
+  }
+  .position-panel .thesis {
+    font-style: italic;
+    color: var(--gold-glow);
+    margin: 0 0 0.9rem;
+    font-size: 1.05rem;
+  }
+  .position-panel .summary {
+    color: var(--ink);
+    line-height: 1.7;
+    margin: 0 0 1.2rem;
+  }
+  .relations {
+    border-top: 1px solid var(--hairline);
+    padding-top: 1rem;
+  }
+  .relations h4 {
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin: 0 0 0.7rem;
+  }
+  .relation {
+    margin-bottom: 0.75rem;
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--hairline);
+  }
+  .relation .rel-link {
+    font-weight: 600;
+    color: var(--gold-glow);
+  }
+  .relation .rel-kind {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-dim);
+    margin-left: 0.4rem;
+  }
+  .relation p {
+    margin: 0.25rem 0 0;
+    font-size: 0.95rem;
+    color: var(--ink-dim);
+  }
+  .no-position {
+    color: var(--ink-dim);
+    font-style: italic;
+    padding: 1rem 0;
+  }
+
+  /* Comparative table */
+  .compare-table-wrap {
+    overflow-x: auto;
+  }
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  .compare-table th,
+  .compare-table td {
+    border: 1px solid var(--hairline);
+    padding: 0.75rem 0.9rem;
+    vertical-align: top;
+    text-align: left;
+  }
+  .compare-table th {
+    background: rgba(201,162,39,0.08);
+    color: var(--gold-glow);
+    font-family: var(--serif-display);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .compare-table th:first-child,
+  .compare-table td:first-child {
+    font-weight: 600;
+    color: var(--ink-dim);
+    white-space: nowrap;
+    width: 9rem;
+  }
+  .compare-table td {
+    color: var(--ink);
+    line-height: 1.55;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: var(--ink-dim);
+    padding: 3rem 1rem;
+    font-style: italic;
+  }
+
+  .map-footer-note {
+    margin-top: 2.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px dashed var(--hairline);
+    font-size: 0.85rem;
+    color: var(--ink-dim);
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="wordmark">MELIUS&nbsp;ILLUMINARE</a>
+  <nav>
+    <a href="figures.html">Figures</a>
+    <a href="spiritualities.html">Spiritualities</a>
+    <a href="map.html">Theological Map</a>
+    <a href="theological-tree.html">Theological Tree</a>
+    <a href="texts/bible.html">Sacred Texts</a>
+    <a href="store.html">Store</a>
+      <a href="about.html">About</a>
+  </nav>
+</header>
+
+<section class="map-hero">
+  <span class="eyebrow">Intellectual Genealogy</span>
+  <h1>Theological Map</h1>
+  <p class="lede">Trace the ideas that shaped Christianity. Choose a concept, follow its development across the centuries, and compare how the major traditions received and contested it.</p>
+</section>
+
+<div class="map-layout">
+  <div class="concept-grid" id="concept-grid"></div>
+
+  <div id="map-content">
+    <p class="empty-state">Select a concept above to open its intellectual lineage.</p>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>Melius Illuminare &middot; Public-domain sources only &middot; <a href="about.html">Sourcing policy</a></p>
+</footer>
+
+<script src="js/figures.js"></script>
+<script src="js/map-data.js"></script>
+<script>
+(function () {
+  const data = window.MAP_DATA;
+  if (!data) return;
+
+  const grid = document.getElementById('concept-grid');
+  const content = document.getElementById('map-content');
+  let currentConcept = null;
+  let currentTab = 'lineage';
+  let selectedNode = null;
+
+  // Build concept chips
+  data.concepts.forEach(function (c) {
+    const btn = document.createElement('button');
+    btn.className = 'concept-chip';
+    btn.type = 'button';
+    btn.textContent = c.name;
+    btn.dataset.id = c.id;
+    btn.addEventListener('click', function () {
+      selectConcept(c.id);
+    });
+    grid.appendChild(btn);
+  });
+
+  function selectConcept(id) {
+    currentConcept = id;
+    selectedNode = null;
+    currentTab = 'lineage';
+    document.querySelectorAll('.concept-chip').forEach(function (el) {
+      el.classList.toggle('active', el.dataset.id === id);
+    });
+    render();
+  }
+
+  function getFigure(id) {
+    if (!window.FIGURES) return null;
+    return window.FIGURES.find(function (f) { return f.id === id; }) || null;
+  }
+
+  function traditionColor(trad) {
+    const t = window.TRADITION_COLORS && window.TRADITION_COLORS[trad];
+    return t ? t.color : 'var(--ink-dim)';
+  }
+
+  function render() {
+    if (!currentConcept) {
+      content.innerHTML = '<p class="empty-state">Select a concept above to open its intellectual lineage.</p>';
+      return;
+    }
+    const concept = data.concepts.find(function (c) { return c.id === currentConcept; });
+    if (!concept) return;
+
+    let html = '<div class="concept-header">';
+    html += '<h2>' + escapeHtml(concept.name) + '</h2>';
+    html += '<p class="short">' + escapeHtml(concept.short) + '</p>';
+    html += '<p class="summary">' + escapeHtml(concept.summary) + '</p>';
+    html += '</div>';
+
+    html += '<div class="map-tabs">';
+    html += tabBtn('lineage', 'Lineage');
+    html += tabBtn('compare', 'Compare Traditions');
+    html += tabBtn('positions', 'Key Positions');
+    html += '</div>';
+
+    html += '<div id="tab-body"></div>';
+    html += '<p class="map-footer-note">Click any figure node to open their position on this concept. Data is seed content — expand by adding entries in <code>js/map-data.js</code>.</p>';
+
+    content.innerHTML = html;
+
+    content.querySelectorAll('.map-tab').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        currentTab = btn.dataset.tab;
+        renderTab();
+      });
+    });
+
+    renderTab();
+  }
+
+  function tabBtn(id, label) {
+    return '<button type="button" class="map-tab' + (currentTab === id ? ' active' : '') + '" data-tab="' + id + '">' + label + '</button>';
+  }
+
+  function renderTab() {
+    const body = document.getElementById('tab-body');
+    if (!body) return;
+
+    content.querySelectorAll('.map-tab').forEach(function (btn) {
+      btn.classList.toggle('active', btn.dataset.tab === currentTab);
+    });
+
+    if (currentTab === 'lineage') {
+      body.innerHTML = renderLineage();
+      body.querySelectorAll('[data-node]').forEach(function (el) {
+        el.addEventListener('click', function () {
+          selectedNode = el.dataset.node;
+          renderTab();
+        });
+      });
+    } else if (currentTab === 'compare') {
+      body.innerHTML = renderCompare();
+    } else if (currentTab === 'positions') {
+      body.innerHTML = renderPositionsList();
+      body.querySelectorAll('[data-node]').forEach(function (el) {
+        el.addEventListener('click', function () {
+          selectedNode = el.dataset.node;
+          currentTab = 'lineage';
+          renderTab();
+        });
+      });
+    }
+  }
+
+  function renderLineage() {
+    const lin = data.lineages[currentConcept];
+    if (!lin) {
+      return '<p class="empty-state">Lineage data for this concept is not yet seeded.</p>';
+    }
+
+    // Simple vertical tree: root → main spine, with side branches where edges diverge
+    let html = '<div class="lineage-wrap"><div class="lineage-tree">';
+    html += '<div class="lineage-node root"><span class="node-label">' + escapeHtml(lin.root) + '</span></div>';
+
+    // Group nodes roughly by “generation” using edges (very simple topological layout)
+    const nodeMap = {};
+    lin.nodes.forEach(function (n) { nodeMap[n.id] = n; });
+
+    // Walk edges in order for a readable spine
+    const rendered = new Set();
+    function emitNode(id) {
+      if (rendered.has(id)) return '';
+      rendered.add(id);
+      const n = nodeMap[id];
+      if (!n) return '';
+      let cls = 'lineage-node';
+      if (n.type === 'era') cls += ' era';
+      if (n.type === 'opponent') cls += ' opponent';
+      const style = n.tradition ? ' style="border-color:' + traditionColor(n.tradition) + '"' : '';
+      return '<div class="' + cls + '"><span class="node-label" data-node="' + escapeHtml(id) + '"' + style + '>' + escapeHtml(n.label) + '</span></div>';
+    }
+
+    // Collect children of each node
+    const children = {};
+    lin.edges.forEach(function (e) {
+      if (e.from === 'root') return;
+      if (!children[e.from]) children[e.from] = [];
+      children[e.from].push(e.to);
+    });
+    const roots = lin.edges.filter(function (e) { return e.from === 'root'; }).map(function (e) { return e.to; });
+
+    function walk(ids, depth) {
+      if (!ids || !ids.length) return '';
+      let out = '<div class="lineage-connector"></div>';
+      if (ids.length === 1) {
+        out += emitNode(ids[0]);
+        out += walk(children[ids[0]], depth + 1);
+      } else {
+        out += '<div class="lineage-branch">';
+        ids.forEach(function (id) {
+          out += '<div style="display:flex;flex-direction:column;align-items:center">';
+          out += emitNode(id);
+          out += walk(children[id], depth + 1);
+          out += '</div>';
+        });
+        out += '</div>';
+      }
+      return out;
+    }
+
+    html += walk(roots, 0);
+    html += '</div></div>';
+
+    // Position panel
+    html += '<div class="position-panel' + (selectedNode ? ' visible' : '') + '" id="position-panel">';
+    html += renderPosition(selectedNode);
+    html += '</div>';
+
+    return html;
+  }
+
+  function renderPosition(nodeId) {
+    if (!nodeId) {
+      return '<p class="no-position">Select a figure or council node above to read their position on this concept.</p>';
+    }
+    const posSet = data.positions[currentConcept] || {};
+    const pos = posSet[nodeId];
+    const fig = getFigure(nodeId);
+    const nodeMeta = (data.lineages[currentConcept] && data.lineages[currentConcept].nodes.find(function (n) { return n.id === nodeId; })) || null;
+
+    const name = (fig && fig.name) || (nodeMeta && nodeMeta.label) || nodeId;
+    const epithet = (fig && fig.epithet) || '';
+
+    if (!pos) {
+      return '<span class="eyebrow">' + escapeHtml(name) + '</span>' +
+        '<h3>' + escapeHtml(name) + '</h3>' +
+        (epithet ? '<p class="summary" style="color:var(--ink-dim)">' + escapeHtml(epithet) + '</p>' : '') +
+        '<p class="no-position">No detailed position seeded yet for this node on this concept. Add an entry under positions.' + currentConcept + '.' + nodeId + ' in map-data.js.</p>';
+    }
+
+    let html = '<span class="eyebrow">' + escapeHtml(name) + '</span>';
+    html += '<h3>' + escapeHtml(name) + '</h3>';
+    html += '<p class="thesis">' + escapeHtml(pos.thesis) + '</p>';
+    html += '<p class="summary">' + escapeHtml(pos.summary) + '</p>';
+
+    if (pos.relations && pos.relations.length) {
+      html += '<div class="relations"><h4>Connections</h4>';
+      pos.relations.forEach(function (r) {
+        const targetFig = getFigure(r.to);
+        const targetLabel = (targetFig && targetFig.name) || r.to;
+        html += '<div class="relation">';
+        html += '<span class="rel-link">' + escapeHtml(name) + ' → ' + escapeHtml(targetLabel) + '</span>';
+        html += '<span class="rel-kind">' + escapeHtml(r.kind) + '</span>';
+        html += '<p>' + escapeHtml(r.note) + '</p>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    if (fig) {
+      // Contextual navigation: if this figure has a full profile with a
+      // dedicated "opinion" on the concept currently open on the map
+      // (e.g. Grace → Augustine), link straight into that section rather
+      // than dropping the reader on a generic profile top. See
+      // js/profile.js for how ?topic= is consumed on the other end.
+      if (fig.slug) {
+        const sep = fig.slug.indexOf('?') === -1 ? '?' : '&';
+        const profileHref = fig.slug + sep + 'topic=' + encodeURIComponent(currentConcept);
+        html += '<p style="margin-top:1.2rem"><a class="btn btn-primary" href="' + profileHref + '">Open full profile on ' + escapeHtml(concept.name) + ' →</a></p>';
+      }
+      html += '<p style="margin-top:0.8rem"><a href="figures.html" style="color:var(--gold-glow)">Browse all figures →</a>';
+      if (fig.works && fig.works.some(function (w) { return w.url; })) {
+        html += ' &nbsp;·&nbsp; Linked works available on the figure card';
+      }
+      html += '</p>';
+    }
+
+    return html;
+  }
+
+  function renderCompare() {
+    const comp = data.comparative[currentConcept];
+    if (!comp) {
+      return '<p class="empty-state">Comparative table for this concept is not yet seeded.</p>';
+    }
+    let html = '<div class="compare-table-wrap"><table class="compare-table"><thead><tr><th></th>';
+    comp.columns.forEach(function (col) {
+      html += '<th>' + escapeHtml(col) + '</th>';
+    });
+    html += '</tr></thead><tbody>';
+    comp.rows.forEach(function (row) {
+      html += '<tr><td>' + escapeHtml(row.label) + '</td>';
+      row.cells.forEach(function (cell) {
+        html += '<td>' + escapeHtml(cell) + '</td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function renderPositionsList() {
+    const posSet = data.positions[currentConcept] || {};
+    const keys = Object.keys(posSet);
+    if (!keys.length) {
+      return '<p class="empty-state">No key positions seeded yet for this concept.</p>';
+    }
+    let html = '<div style="display:grid;gap:0.8rem">';
+    keys.forEach(function (id) {
+      const pos = posSet[id];
+      const fig = getFigure(id);
+      const name = (fig && fig.name) || id;
+      html += '<button type="button" data-node="' + escapeHtml(id) + '" class="concept-chip" style="text-align:left;padding:0.8rem 1rem">';
+      html += '<strong style="color:var(--gold-glow)">' + escapeHtml(name) + '</strong><br>';
+      html += '<span style="font-size:0.9rem;color:var(--ink-dim)">' + escapeHtml(pos.thesis) + '</span>';
+      html += '</button>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function escapeHtml(s) {
+    if (!s) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // Optional: open concept from hash
+  const hash = (location.hash || '').replace(/^#/, '');
+  if (hash && data.concepts.some(function (c) { return c.id === hash; })) {
+    selectConcept(hash);
+  }
+})();
+</script>
+<script src="js/site-nav.js"></script>
+<script src="js/ambient-dust.js"></script>
+<script src="js/epic-reveal.js"></script>
+
+</body>
+</html>

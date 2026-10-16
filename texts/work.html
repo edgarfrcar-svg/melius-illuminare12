@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work — Melius Illuminare</title>
+<meta name="description" content="Read a public-domain theological work. Sectioned like a book, with stable citations and deep links.">
+<link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/site-polish.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+  <link rel="stylesheet" href="../css/sacred-objects.css">
+<style>
+  /* Natural book-like reader */
+  body.work-reading {
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(201,162,39,0.05), transparent 50%),
+      var(--bg);
+  }
+  .work-app {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    max-width: 1080px;
+    margin: 0 auto;
+    min-height: calc(100vh - 120px);
+    gap: 0;
+  }
+  @media (max-width: 900px) {
+    .work-app { grid-template-columns: 1fr; }
+    .work-side { display: none; }
+    .work-side.open {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: #0e0f14;
+      overflow-y: auto;
+      padding: 1.25rem;
+    }
+  }
+  .work-side {
+    border-right: 1px solid rgba(236,229,212,0.08);
+    background: linear-gradient(180deg, rgba(14,15,20,0.98), rgba(10,11,16,0.98));
+    padding: 1.25rem 0.9rem 2.5rem;
+    position: sticky;
+    top: 64px;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  .work-side h3 {
+    font-family: var(--serif-display);
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(201,162,39,0.75);
+    margin: 1.15rem 0 0.55rem;
+    font-weight: 500;
+  }
+  .work-side h3:first-child { margin-top: 0.15rem; }
+  .toc-group { margin-bottom: 0.2rem; }
+  .toc-group-btn {
+    display: flex; align-items: center; gap: 0.35rem;
+    width: 100%; text-align: left;
+    background: transparent; border: none;
+    color: #d8d0c0; font-family: var(--serif-body);
+    font-size: 0.95rem; padding: 0.4rem 0.5rem;
+    border-radius: 6px; cursor: pointer;
+    line-height: 1.35;
+  }
+  .toc-group-btn:hover { color: #ffe9a8; background: rgba(201,162,39,0.07); }
+  .toc-group-btn .chev { font-size: 0.65rem; opacity: 0.55; width: 0.85rem; }
+  .toc-group-btn.is-active { color: #ffe9a8; }
+  .toc-children { display: none; padding-left: 0.75rem; margin: 0.1rem 0 0.35rem; }
+  .toc-group.open .toc-children { display: block; }
+  .work-side a.ch-link {
+    display: block;
+    color: #9a9284;
+    text-decoration: none;
+    font-size: 0.88rem;
+    padding: 0.32rem 0.45rem;
+    border-radius: 5px;
+    line-height: 1.4;
+  }
+  .work-side a.ch-link:hover,
+  .work-side a.ch-link.is-active {
+    color: #e8d9a0;
+    background: rgba(201,162,39,0.08);
+  }
+
+  .work-main {
+    padding: 1.5rem 1.5rem 5rem;
+    max-width: none;
+  }
+  @media (min-width: 901px) {
+    .work-main { padding: 1.75rem 2.5rem 5.5rem 2rem; }
+  }
+
+  .work-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin: 0 0 1.25rem;
+    padding: 0.55rem 0 0.85rem;
+    border-bottom: 1px solid rgba(236,229,212,0.08);
+    position: sticky;
+    top: 64px;
+    z-index: 5;
+    background: linear-gradient(180deg, rgba(11,13,20,0.97) 70%, rgba(11,13,20,0.85));
+    backdrop-filter: blur(8px);
+  }
+  .work-toolbar button {
+    font-family: var(--serif-body);
+    font-size: 0.86rem;
+    background: rgba(18,20,28,0.9);
+    color: #c8c0b0;
+    border: 1px solid rgba(236,229,212,0.1);
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .work-toolbar button:hover,
+  .work-toolbar button.is-on {
+    border-color: rgba(201,162,39,0.45);
+    color: #ffe9a8;
+    background: rgba(201,162,39,0.1);
+  }
+  .work-toolbar button:disabled {
+    opacity: 0.35; cursor: default;
+  }
+  .work-toolbar .status {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: #8a8274;
+    letter-spacing: 0.02em;
+  }
+
+  .cite-bar {
+    font-size: 0.84rem;
+    color: #9a9284;
+    margin-bottom: 1.35rem;
+    display: flex; flex-wrap: wrap; gap: 0.45rem 0.9rem; align-items: center;
+  }
+  .cite-bar code {
+    font-size: 0.78rem;
+    color: #e0c35a;
+    background: rgba(201,162,39,0.08);
+    padding: 0.18rem 0.45rem;
+    border-radius: 4px;
+  }
+  .cite-bar button {
+    font-family: var(--serif-body);
+    font-size: 0.78rem;
+    background: transparent;
+    border: 1px solid rgba(236,229,212,0.12);
+    color: #9a9284;
+    padding: 0.22rem 0.55rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .cite-bar button:hover { color: #ffe9a8; border-color: rgba(201,162,39,0.4); }
+
+  .work-meta {
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(236,229,212,0.08);
+  }
+  .work-meta .eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c9a227;
+  }
+  .work-meta h1 {
+    font-family: var(--serif-display);
+    font-size: clamp(1.55rem, 3vw, 2.05rem);
+    margin: 0.35rem 0 0.4rem;
+    line-height: 1.22;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: #f5f0e6;
+  }
+  .work-meta .sub {
+    color: #a39a86;
+    font-size: 1rem;
+    font-style: italic;
+    margin: 0;
+    line-height: 1.45;
+  }
+
+  /* The page — soft panel, natural measure */
+  .work-page {
+    background:
+      linear-gradient(180deg, rgba(28,26,22,0.55), rgba(18,17,15,0.4));
+    border: 1px solid rgba(236,229,212,0.07);
+    border-radius: 12px;
+    padding: 1.75rem 1.5rem 2.25rem;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+  }
+  @media (min-width: 640px) {
+    .work-page { padding: 2.25rem 2.4rem 2.75rem; }
+  }
+
+  .work-page .section-label {
+    font-family: var(--serif-display);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c9a227;
+    margin: 0 0 0.65rem;
+  }
+  .work-page h2.chapter-title {
+    font-family: var(--serif-display);
+    font-size: clamp(1.25rem, 2.4vw, 1.55rem);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: #f0e8d8;
+    margin: 0 0 1.35rem;
+    line-height: 1.3;
+  }
+
+  .work-prose {
+    font-family: var(--serif-body);
+    font-size: 1.125rem;
+    line-height: 1.78;
+    color: #e4dcc8;
+    max-width: 38rem;
+  }
+  .work-prose p {
+    margin: 0 0 1.15em;
+    text-wrap: pretty;
+  }
+  .work-prose p:last-child { margin-bottom: 0; }
+  .work-prose p.is-target,
+  .work-prose p.highlight {
+    background: rgba(201,162,39,0.12);
+    box-shadow: -3px 0 0 #c9a227;
+    padding: 0.35rem 0.55rem;
+    margin-left: -0.55rem;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .banner-reading {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: #b8b0a0;
+    background: rgba(201,162,39,0.06);
+    border: 1px solid rgba(201,162,39,0.18);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 2rem 0 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(236,229,212,0.08);
+  }
+  .section-nav button {
+    font-family: var(--serif-body);
+    font-size: 0.9rem;
+    background: rgba(18,20,28,0.9);
+    color: #d0c8b4;
+    border: 1px solid rgba(236,229,212,0.12);
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    max-width: 48%;
+    line-height: 1.35;
+  }
+  .section-nav button:hover {
+    border-color: rgba(201,162,39,0.45);
+    color: #ffe9a8;
+  }
+  .section-nav button:disabled {
+    opacity: 0.3; cursor: default;
+  }
+  .source-footer {
+    margin-top: 2rem;
+    font-size: 0.84rem;
+    color: #8a8274;
+    line-height: 1.5;
+  }
+  .source-footer a { color: #c4b07a; }
+  .chapter-block + .chapter-block {
+    margin-top: 2.5rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid rgba(236,229,212,0.08);
+  }
+  .hl-selectable {
+    cursor: text;
+  }
+
+  /* Reading progress */
+  .read-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 100;
+    background: rgba(236,229,212,0.06);
+    pointer-events: none;
+  }
+  .read-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #8a6c1c, #e0c35a, #ffe9a8);
+    box-shadow: 0 0 10px rgba(224,195,90,0.45);
+    transition: width 0.12s ease-out;
+  }
+
+  /* Floating bookmark rail (follows scroll) */
+  .bm-rail {
+    position: fixed;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 40;
+    width: min(220px, calc(100vw - 1.5rem));
+    max-height: min(70vh, 420px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.65rem 0.7rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid rgba(201,162,39,0.28);
+    background: rgba(12, 13, 18, 0.92);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+    font-size: 0.82rem;
+  }
+  .bm-rail-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    margin-bottom: 0.15rem;
+  }
+  .bm-rail-title {
+    font-family: var(--serif-display);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #c9a227;
+  }
+  .bm-rail-toggle {
+    background: transparent;
+    border: 1px solid rgba(236,229,212,0.12);
+    color: #a39a86;
+    border-radius: 4px;
+    width: 1.6rem;
+    height: 1.6rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 0;
+  }
+  .bm-rail.collapsed {
+    width: auto;
+    max-height: none;
+    padding: 0.45rem;
+  }
+  .bm-rail.collapsed .bm-rail-body,
+  .bm-rail.collapsed .bm-rail-title { display: none; }
+  .bm-here {
+    color: #c8c0b0;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    margin: 0 0 0.35rem;
+  }
+  .bm-here strong { color: #f0e8d8; font-weight: 500; }
+  .bm-saved {
+    color: #9a9284;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    margin: 0 0 0.45rem;
+  }
+  .bm-saved strong { color: #e0c35a; font-weight: 500; }
+  .bm-actions button.bm-secondary {
+    background: transparent;
+    border-color: rgba(236,229,212,0.15);
+    color: #9a9284;
+  }
+  .bm-actions button.bm-secondary:hover {
+    color: #c08070;
+    border-color: rgba(192,128,112,0.4);
+    background: rgba(192,128,112,0.08);
+  }
+  .bm-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.45rem;
+  }
+  .bm-actions button {
+    font-family: var(--serif-body);
+    font-size: 0.8rem;
+    background: rgba(201,162,39,0.1);
+    border: 1px solid rgba(201,162,39,0.35);
+    color: #ffe9a8;
+    border-radius: 6px;
+    padding: 0.45rem 0.55rem;
+    cursor: pointer;
+    min-height: 40px;
+  }
+  .bm-actions button:hover { background: rgba(201,162,39,0.18); }
+  .bm-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    max-height: 220px;
+    flex: 1;
+  }
+  .bm-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.35rem;
+    margin: 0 0 0.35rem;
+  }
+  .bm-list a {
+    flex: 1;
+    color: #d8d0c0;
+    text-decoration: none;
+    line-height: 1.3;
+    padding: 0.35rem 0.4rem;
+    border-radius: 4px;
+    border: 1px solid transparent;
+  }
+  .bm-list a:hover {
+    color: #ffe9a8;
+    background: rgba(201,162,39,0.08);
+    border-color: rgba(201,162,39,0.2);
+  }
+  .bm-list .bm-del {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    color: #6a6258;
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 0.85rem;
+    min-width: 28px;
+    min-height: 28px;
+  }
+  .bm-list .bm-del:hover { color: #c08070; }
+  .bm-empty {
+    color: #6a6258;
+    font-size: 0.78rem;
+    font-style: italic;
+    margin: 0.25rem 0 0;
+  }
+  @media (max-width: 900px) {
+    .bm-rail {
+      right: 0.5rem;
+      left: auto;
+      top: auto;
+      bottom: 1rem;
+      transform: none;
+      width: min(200px, calc(100vw - 1rem));
+      max-height: 40vh;
+    }
+  }
+  @media (max-width: 560px) {
+    .bm-rail:not(.collapsed) {
+      left: 0.5rem;
+      right: 0.5rem;
+      width: auto;
+    }
+  }
+
+
+  /* Reader comfort: type scale + measure */
+  .work-page {
+    font-size: var(--reader-fs, 1.08rem);
+    max-width: var(--reader-measure, 38rem);
+    margin-left: auto;
+    margin-right: auto;
+    transition: max-width 0.2s ease, font-size 0.15s ease;
+  }
+  .work-page.work-prose,
+  .work-page .work-prose,
+  .chapter-block.work-prose {
+    font-size: inherit;
+  }
+  .work-prose p {
+    font-size: 1em;
+    line-height: var(--reader-lh, 1.72);
+  }
+  body.reader-wide .work-page {
+    max-width: var(--reader-measure-wide, 48rem);
+  }
+  body.reader-narrow .work-page {
+    max-width: var(--reader-measure-narrow, 32rem);
+  }
+
+  /* Focus / zen mode */
+  body.reader-focus .site-header,
+  body.reader-focus .work-side,
+  body.reader-focus .bm-rail,
+  body.reader-focus .site-footer {
+    display: none !important;
+  }
+  body.reader-focus .work-app {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+  body.reader-focus .work-main {
+    padding: 0.75rem 1rem 3rem;
+    max-width: 100%;
+  }
+  body.reader-focus .work-toolbar {
+    top: 0;
+  }
+  body.reader-focus .read-progress {
+    top: 0;
+  }
+  .focus-exit {
+    display: none;
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+    font-family: var(--serif-body);
+    font-size: 0.85rem;
+    background: rgba(12,13,18,0.92);
+    border: 1px solid rgba(201,162,39,0.4);
+    color: #ffe9a8;
+    padding: 0.55rem 1.1rem;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  body.reader-focus .focus-exit {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* TOC active section */
+  .work-side a.ch-link.is-active,
+  .toc-group-btn.is-current {
+    color: #ffe9a8 !important;
+    background: rgba(201,162,39,0.12) !important;
+    border-left: 2px solid #c9a227;
+  }
+  .work-side a.ch-link {
+    border-left: 2px solid transparent;
+  }
+
+  .work-toolbar .tool-group {
+    display: inline-flex;
+    gap: 0.25rem;
+    align-items: center;
+  }
+  .work-toolbar kbd {
+    font-size: 0.65rem;
+    opacity: 0.55;
+    margin-left: 0.2rem;
+  }
+
+  @media print {
+    .site-header, .work-side, .work-toolbar, .bm-rail, .read-progress,
+    .focus-exit, .site-footer, .hl-popup, .section-nav, #btn-side {
+      display: none !important;
+    }
+    body, body.work-reading {
+      background: #fff !important;
+      color: #111 !important;
+    }
+    .work-app { display: block; max-width: 100%; }
+    .work-main { padding: 0; }
+    .work-page {
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      max-width: 100% !important;
+      color: #111 !important;
+    }
+    .work-prose p, .chapter-title, .work-meta h1, .work-meta .sub {
+      color: #111 !important;
+    }
+    .bookmark-marker { display: none; }
+    a[href]::after { content: none !important; }
+  }
+
+</style>
+</head>
+<body class="work-reading">
+<div class="read-progress" id="read-progress" aria-hidden="true"><div class="read-progress-bar" id="read-progress-bar"></div></div>
+<aside class="bm-rail" id="bm-rail" aria-label="Bookmark">
+  <div class="bm-rail-head">
+    <span class="bm-rail-title">Bookmark</span>
+    <button type="button" class="bm-rail-toggle" id="bm-rail-toggle" title="Collapse">−</button>
+  </div>
+  <div class="bm-rail-body">
+    <p class="bm-here" id="bm-here">Here: <strong>—</strong></p>
+    <p class="bm-saved" id="bm-saved">Saved: <strong>None</strong></p>
+    <div class="bm-actions">
+      <button type="button" id="bm-save-here">Set bookmark here</button>
+      <button type="button" id="bm-goto-here">Go to bookmark</button>
+      <button type="button" id="bm-clear-here" class="bm-secondary">Clear bookmark</button>
+    </div>
+  </div>
+</aside>
+
+
+<header class="site-header">
+  <a href="../index.html" class="wordmark">MELIUS&nbsp;ILLUMINARE</a>
+  <nav>
+    <a href="../figures.html">Figures</a>
+    <a href="../concepts.html">Concepts</a>
+    <a href="../magisterium.html">Magisterium</a>
+      <a href="papacy.html">Papacy</a>
+      <a href="../prayer.html">Prayer</a>
+      <a href="../mass.html">Mass</a>
+    <a href="../spiritualities.html">Spiritualities</a>
+    <a href="../theological-tree.html">Theological Tree</a>
+    <a href="bible.html">Sacred Texts</a>
+    <a href="../store.html">Store</a>
+      <a href="../about.html">About</a>
+  </nav>
+</header>
+
+<div class="work-app">
+  <aside class="work-side" id="work-side">
+    <h3>Contents</h3>
+    <div id="work-toc"></div>
+    <h3>Reading tools</h3>
+    <p class="tools-note">One bookmark, highlights, and auto-resume stay in this browser. Keys: ← → sections · B bookmark · F focus · T contents · A+/A− size.</p>
+  </aside>
+
+  <main class="work-main">
+    <div class="work-toolbar">
+      <button type="button" id="btn-side" title="Contents (T)">Contents</button>
+      <button type="button" id="btn-prev" title="Previous section (←)">← Prev</button>
+      <button type="button" id="btn-next" title="Next section (→)">Next →</button>
+      <span class="tool-group" title="Type size">
+        <button type="button" id="btn-fs-down" aria-label="Smaller text">A−</button>
+        <button type="button" id="btn-fs-up" aria-label="Larger text">A+</button>
+      </span>
+      <button type="button" id="btn-measure" title="Line length">Width</button>
+      <button type="button" id="btn-focus" title="Focus mode (F)">Focus</button>
+      <button type="button" id="btn-bookmark" title="Bookmark (B)">Bookmark</button>
+      <button type="button" id="btn-goto-bookmark">Go to bookmark</button>
+      <button type="button" id="btn-copy-section" title="Copy this section">Copy section</button>
+      <button type="button" id="btn-print" title="Print">Print</button>
+      <button type="button" id="btn-clear-hl">Clear highlights</button>
+      <span class="status" id="tool-status"></span>
+    </div>
+    <button type="button" class="focus-exit" id="focus-exit">Exit focus mode · Esc</button>
+    <div class="cite-bar" id="cite-bar" hidden>
+      <span>Location: <code id="cite-code"></code></span>
+      <button type="button" id="btn-copy-cite">Copy link</button>
+    </div>
+    <div id="work-root"></div>
+  </main>
+</div>
+
+<div class="hl-popup" id="hl-popup" role="dialog" aria-label="Highlight tools">
+  <button type="button" id="btn-hl">Highlight</button>
+  <button type="button" id="btn-hl-clear-sel">Clear here</button>
+  <button type="button" id="btn-cite-para">Cite paragraph</button>
+</div>
+
+<script src="../js/works.js" onerror="window.WORKS=window.WORKS||{}"></script>
+<script src="../js/magisterium-texts.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  function qs(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+  function storageKey(workId, kind) {
+    return 'melius_' + kind + '_' + workId;
+  }
+  function loadJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      return JSON.parse(raw);
+    } catch (e) { return fallback; }
+  }
+  function saveJSON(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* ignore */ }
+  }
+  function flash(msg) {
+    const el = document.getElementById('tool-status');
+    if (!el) return;
+    el.textContent = msg;
+    clearTimeout(flash._t);
+    flash._t = setTimeout(function () { el.textContent = ''; }, 2800);
+  }
+
+  /** Parse "Book 19 — §3" / "Book XIX, Chapter 4" style headings into groups */
+  function parseHeading(heading, index) {
+    const h = heading || ('Section ' + (index + 1));
+    let m = h.match(/^Book\s+(\d+)\s*[—–\-:]?\s*(.*)$/i);
+    if (m) {
+      return {
+        groupKey: 'book-' + m[1],
+        groupLabel: 'Book ' + m[1],
+        subLabel: (m[2] || '').replace(/^§\s*/, '§').trim() || ('§' + (index + 1)),
+        raw: h
+      };
+    }
+    m = h.match(/^(Book\s+[IVXLC]+)\b\s*[—–\-:]?\s*(.*)$/i);
+    if (m) {
+      return {
+        groupKey: slug(m[1]),
+        groupLabel: m[1],
+        subLabel: (m[2] || '').trim() || ('Part ' + (index + 1)),
+        raw: h
+      };
+    }
+    return { groupKey: 'sec-' + index, groupLabel: h, subLabel: null, raw: h, flat: true };
+  }
+  function slug(s) {
+    return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  let currentWorkId = null;
+  let currentWork = null;
+  let currentSection = 0;
+  let sectionMode = true; // one section at a time for long works
+
+  function shouldUseSectionMode(w) {
+    const n = (w.chapters || []).length;
+    let chars = 0;
+    (w.chapters || []).forEach(function (ch) {
+      (ch.paragraphs || []).forEach(function (p) { chars += p.length; });
+    });
+    return n > 12 || chars > 80000;
+  }
+
+  function buildToc(w) {
+    const tocEl = document.getElementById('work-toc');
+    const chapters = w.chapters || [];
+    const groups = [];
+    const groupMap = {};
+
+    chapters.forEach(function (ch, i) {
+      const info = parseHeading(ch.heading, i);
+      if (info.flat) {
+        groups.push({ type: 'flat', index: i, label: info.raw });
+        return;
+      }
+      if (!groupMap[info.groupKey]) {
+        groupMap[info.groupKey] = {
+          type: 'group',
+          key: info.groupKey,
+          label: info.groupLabel,
+          items: []
+        };
+        groups.push(groupMap[info.groupKey]);
+      }
+      groupMap[info.groupKey].items.push({
+        index: i,
+        label: info.subLabel || info.raw
+      });
+    });
+
+    let html = '';
+    groups.forEach(function (g) {
+      if (g.type === 'flat') {
+        const activeFlat = g.index === currentSection ? ' is-active' : '';
+        html += '<a class="ch-link' + activeFlat + '" href="#s' + g.index + '" data-ch="' + g.index + '">' +
+          escapeHtml(g.label) + '</a>';
+        return;
+      }
+      const openCls = g.items.some(function (it) { return it.index === currentSection; }) ? ' open' : '';
+      html += '<div class="toc-group' + openCls + '" data-group="' + escapeHtml(g.key) + '">';
+      html += '<button type="button" class="toc-group-btn" data-group-btn="' + escapeHtml(g.key) + '">';
+      html += '<span class="chev">' + (openCls ? '▾' : '▸') + '</span>';
+      html += '<span>' + escapeHtml(g.label) + '</span></button>';
+      html += '<div class="toc-children">';
+      g.items.forEach(function (it) {
+        const active = it.index === currentSection ? ' is-active' : '';
+        html += '<a class="ch-link' + active + '" href="#s' + it.index + '" data-ch="' + it.index + '">' +
+          escapeHtml(it.label) + '</a>';
+      });
+      html += '</div></div>';
+    });
+    tocEl.innerHTML = html || '<span style="color:var(--ink-dim);font-size:0.85rem">No sections</span>';
+
+    tocEl.querySelectorAll('[data-group-btn]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const parent = btn.closest('.toc-group');
+        parent.classList.toggle('open');
+        const chev = btn.querySelector('.chev');
+        if (chev) chev.textContent = parent.classList.contains('open') ? '▾' : '▸';
+      });
+    });
+    tocEl.querySelectorAll('.ch-link').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        goToSection(parseInt(a.getAttribute('data-ch'), 10), null, true);
+        document.getElementById('work-side').classList.remove('open');
+      });
+    });
+    scrollTocToActive();
+  }
+
+  function scrollTocToActive() {
+    var tocEl = document.getElementById('work-toc');
+    if (!tocEl) return;
+    var active = tocEl.querySelector('.ch-link.is-active');
+    if (!active) return;
+    var side = document.getElementById('work-side');
+    if (!side) return;
+    try {
+      var ar = active.getBoundingClientRect();
+      var sr = side.getBoundingClientRect();
+      if (ar.top < sr.top + 40 || ar.bottom > sr.bottom - 40) {
+        active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    } catch (e) {}
+  }
+
+  function paraId(si, pi) {
+    return 's' + si + '-p' + pi;
+  }
+
+  function updateCiteBar(si, pi) {
+    const bar = document.getElementById('cite-bar');
+    const code = document.getElementById('cite-code');
+    if (!currentWork) { bar.hidden = true; return; }
+    const ch = (currentWork.chapters || [])[si];
+    if (!ch) { bar.hidden = true; return; }
+    const label = (ch.heading || ('Section ' + (si + 1))) +
+      (pi != null ? ' · ¶' + (pi + 1) : '');
+    code.textContent = label;
+    bar.hidden = false;
+    bar.dataset.section = String(si);
+    bar.dataset.para = pi != null ? String(pi) : '';
+  }
+
+  function renderSection() {
+    const root = document.getElementById('work-root');
+    const w = currentWork;
+    if (!w) return;
+
+    const chapters = w.chapters || [];
+    if (!chapters.length) {
+      root.innerHTML = '<p class="missing">This work has no text sections yet.</p>';
+      return;
+    }
+    if (currentSection < 0) currentSection = 0;
+    if (currentSection >= chapters.length) currentSection = chapters.length - 1;
+
+    const ch = chapters[currentSection];
+    let body = '';
+    body += '<div class="work-meta">';
+    body += '<span class="eyebrow">' + escapeHtml(w.author || '') + '</span>';
+    body += '<h1>' + escapeHtml(w.title) + '</h1>';
+    body += '<div class="sub">' + escapeHtml(w.translation || 'Public domain translation');
+    if (sectionMode) {
+      body += ' · Section ' + (currentSection + 1) + ' of ' + chapters.length;
+    }
+    body += '</div></div>';
+
+    body += '<div class="work-page">';
+
+    if (w.note) {
+      body += '<div class="banner-reading">';
+      body += '<strong style="display:block;margin-bottom:0.35rem;color:#e8d9a0;font-size:0.92rem;">What you are reading</strong>';
+      body += '<div style="white-space:pre-wrap;">' + escapeHtml(w.note) + '</div>';
+      body += '</div>';
+    }
+
+    if (sectionMode) {
+      body += '<section class="chapter-block work-prose" id="s' + currentSection + '">';
+      if (ch.heading) body += '<p class="section-label">Section</p><h2 class="chapter-title" id="s' + currentSection + '-h">' + escapeHtml(ch.heading) + '</h2>';
+      (ch.paragraphs || []).forEach(function (para, pi) {
+        body += '<p class="hl-selectable" data-ch="' + currentSection + '" data-p="' + pi +
+          '" id="' + paraId(currentSection, pi) + '">' + escapeHtml(para) + '</p>';
+      });
+      body += '</section>';
+
+      const prevLabel = currentSection > 0
+        ? (chapters[currentSection - 1].heading || ('Section ' + currentSection))
+        : '';
+      const nextLabel = currentSection < chapters.length - 1
+        ? (chapters[currentSection + 1].heading || ('Section ' + (currentSection + 2)))
+        : '';
+      body += '<div class="section-nav">';
+      body += '<button type="button" id="nav-prev"' + (currentSection <= 0 ? ' disabled' : '') + '>';
+      body += '<span class="label">Previous</span>' + escapeHtml(prevLabel || '—') + '</button>';
+      body += '<button type="button" id="nav-next"' + (currentSection >= chapters.length - 1 ? ' disabled' : '') + '>';
+      body += '<span class="label">Next</span>' + escapeHtml(nextLabel || '—') + '</button>';
+      body += '</div>';
+    } else {
+      chapters.forEach(function (c, i) {
+        body += '<section class="chapter-block work-prose" id="s' + i + '">';
+        if (c.heading) body += '<h2 class="chapter-title" id="s' + i + '-h">' + escapeHtml(c.heading) + '</h2>';
+        (c.paragraphs || []).forEach(function (para, pi) {
+          body += '<p class="hl-selectable" data-ch="' + i + '" data-p="' + pi +
+            '" id="' + paraId(i, pi) + '">' + escapeHtml(para) + '</p>';
+        });
+        body += '</section>';
+      });
+    }
+
+    body += '</div>'; // work-page
+
+    body += '<p class="source-footer">';
+    body += escapeHtml(w.note || 'This text is in the public domain and is hosted on Melius Illuminare for reading without leaving the site.');
+    body += ' · Stable links use <code>#sN</code> (section) and <code>#sN-pM</code> (paragraph).';
+    if (w.magisteriumId) {
+      body += ' · <a href="../magisterium.html">Magisterium</a>';
+      body += ' · <a href="../magisterium-century.html">Centuries</a>';
+    } else {
+      body += ' · <a href="../figures.html">Figures</a>';
+    }
+    if (w.sourceUrl) {
+      body += ' · <a href="' + escapeHtml(w.sourceUrl) + '" target="_blank" rel="noopener">External source</a>';
+    }
+    body += '</p>';
+
+    root.innerHTML = body;
+
+    document.getElementById('btn-prev').disabled = currentSection <= 0;
+    document.getElementById('btn-next').disabled = currentSection >= chapters.length - 1;
+
+    const navPrev = document.getElementById('nav-prev');
+    const navNext = document.getElementById('nav-next');
+    if (navPrev) navPrev.addEventListener('click', function () { goToSection(currentSection - 1, null, true); });
+    if (navNext) navNext.addEventListener('click', function () { goToSection(currentSection + 1, null, true); });
+
+    buildToc(w);
+    updateCiteBar(currentSection, null);
+    applyHighlights(currentWorkId);
+    applyBookmarkMarkers(currentWorkId);
+    renderBookmarkList();
+    updateHereLabel();
+    updateReadProgress();
+
+    // Paragraph click updates citation
+    root.querySelectorAll('p.hl-selectable').forEach(function (p) {
+      p.addEventListener('click', function () {
+        const si = parseInt(p.getAttribute('data-ch'), 10);
+        const pi = parseInt(p.getAttribute('data-p'), 10);
+        updateCiteBar(si, pi);
+      });
+    });
+  }
+
+  function goToSection(si, paraIndex, pushHash) {
+    if (!currentWork) return;
+    const n = (currentWork.chapters || []).length;
+    if (si < 0 || si >= n) return;
+    currentSection = si;
+    renderSection();
+    if (pushHash) {
+      const hash = paraIndex != null ? paraId(si, paraIndex) : ('s' + si);
+      if (history.replaceState) {
+        history.replaceState(null, '', '#' + hash);
+      } else {
+        location.hash = hash;
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (paraIndex != null) {
+      setTimeout(function () { highlightTarget(paraId(si, paraIndex)); }, 50);
+    }
+  }
+
+  function highlightTarget(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('is-target');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function () { el.classList.add('fade'); }, 2200);
+    setTimeout(function () { el.classList.remove('is-target', 'fade'); }, 4000);
+    const m = id.match(/^s(\d+)(?:-p(\d+))?$/);
+    if (m) {
+      updateCiteBar(parseInt(m[1], 10), m[2] != null ? parseInt(m[2], 10) : null);
+    }
+  }
+
+  function parseHash() {
+    const hash = (window.location.hash || '').replace(/^#/, '');
+    if (!hash) return null;
+    // s12-p3 or s12 or legacy ch-12 / p-12-3
+    let m = hash.match(/^s(\d+)(?:-p(\d+))?$/);
+    if (m) return { section: parseInt(m[1], 10), para: m[2] != null ? parseInt(m[2], 10) : null };
+    m = hash.match(/^ch-(\d+)$/);
+    if (m) return { section: parseInt(m[1], 10), para: null };
+    m = hash.match(/^p-(\d+)-(\d+)$/);
+    if (m) return { section: parseInt(m[1], 10), para: parseInt(m[2], 10) };
+    return null;
+  }
+
+  function applyHighlights(workId) {
+    const map = loadJSON(storageKey(workId, 'hl'), {});
+    Object.keys(map).forEach(function (pid) {
+      const el = document.getElementById(pid);
+      if (!el || el.querySelector('mark.user-hl')) return;
+      const ranges = map[pid];
+      if (!ranges || !ranges.length) return;
+      // Simple: wrap whole paragraph if stored as full
+      const text = el.textContent;
+      el.innerHTML = '';
+      let cursor = 0;
+      ranges.slice().sort(function (a, b) { return a.start - b.start; }).forEach(function (r) {
+        const start = Math.max(0, r.start);
+        const end = Math.min(text.length, r.end);
+        if (start > cursor) el.appendChild(document.createTextNode(text.slice(cursor, start)));
+        const mark = document.createElement('mark');
+        mark.className = 'user-hl';
+        mark.textContent = text.slice(start, end);
+        el.appendChild(mark);
+        cursor = end;
+      });
+      if (cursor < text.length) el.appendChild(document.createTextNode(text.slice(cursor)));
+    });
+  }
+
+  function saveHighlightFromSelection() {
+    if (!currentWorkId) return;
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) return;
+    const node = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+    const p = node && node.closest && node.closest('p.hl-selectable');
+    if (!p) return;
+    const full = p.textContent;
+    const range = sel.getRangeAt(0);
+    // Approximate offsets within paragraph
+    const pre = range.cloneRange();
+    pre.selectNodeContents(p);
+    pre.setEnd(range.startContainer, range.startOffset);
+    const start = pre.toString().length;
+    const end = start + range.toString().length;
+    if (end <= start) return;
+    const map = loadJSON(storageKey(currentWorkId, 'hl'), {});
+    if (!map[p.id]) map[p.id] = [];
+    map[p.id].push({ start: start, end: end });
+    saveJSON(storageKey(currentWorkId, 'hl'), map);
+    applyHighlights(currentWorkId);
+    hidePopup();
+    flash('Highlighted');
+  }
+
+  function clearHighlightsInWork() {
+    if (!currentWorkId) return;
+    saveJSON(storageKey(currentWorkId, 'hl'), {});
+    renderSection();
+    flash('Highlights cleared');
+  }
+
+  function getBookmark(workId) {
+    return loadJSON(storageKey(workId, 'bm'), null);
+  }
+
+  function bookmarkLabel(si, pi) {
+    var chapters = (currentWork && currentWork.chapters) || [];
+    var ch = chapters[si] || {};
+    var head = ch.heading || ('Section ' + (si + 1));
+    if (pi != null) return head + ' · ¶' + (pi + 1);
+    return head;
+  }
+
+  function visiblePlace() {
+    var si = currentSection;
+    var pi = null;
+    var paras = document.querySelectorAll('p.hl-selectable');
+    for (var i = 0; i < paras.length; i++) {
+      var r = paras[i].getBoundingClientRect();
+      if (r.top >= 72 && r.top < window.innerHeight * 0.5) {
+        pi = parseInt(paras[i].getAttribute('data-p'), 10);
+        si = parseInt(paras[i].getAttribute('data-ch'), 10);
+        break;
+      }
+    }
+    return { section: si, para: pi };
+  }
+
+  function updateHereLabel() {
+    var el = document.getElementById('bm-here');
+    if (!el) return;
+    var place = visiblePlace();
+    el.innerHTML = 'Here: <strong>' + escapeHtml(bookmarkLabel(place.section, place.para)) + '</strong>';
+    updateSavedLabel();
+  }
+
+  function updateSavedLabel() {
+    var el = document.getElementById('bm-saved');
+    if (!el || !currentWorkId) return;
+    var bm = getBookmark(currentWorkId);
+    if (!bm) {
+      el.innerHTML = 'Saved: <strong>None</strong>';
+      return;
+    }
+    var label = bm.label || bookmarkLabel(bm.section, bm.para);
+    el.innerHTML = 'Saved: <strong>' + escapeHtml(label) + '</strong>';
+  }
+
+  function renderBookmarkList() {
+    updateSavedLabel();
+  }
+
+  function saveBookmark() {
+    if (!currentWorkId) return;
+    var place = visiblePlace();
+    var bm = {
+      section: place.section,
+      para: place.para,
+      label: bookmarkLabel(place.section, place.para),
+      scroll: window.scrollY,
+      at: Date.now()
+    };
+    saveJSON(storageKey(currentWorkId, 'bm'), bm);
+    // clear any old multi-bookmark list
+    try { localStorage.removeItem(storageKey(currentWorkId, 'bms')); } catch (e) {}
+    applyBookmarkMarker(currentWorkId);
+    updateSavedLabel();
+    flash('Bookmark set');
+  }
+
+  function clearBookmark() {
+    if (!currentWorkId) return;
+    try {
+      localStorage.removeItem(storageKey(currentWorkId, 'bm'));
+      localStorage.removeItem(storageKey(currentWorkId, 'bms'));
+    } catch (e) {}
+    document.querySelectorAll('.bookmark-marker').forEach(function (m) { m.remove(); });
+    updateSavedLabel();
+    flash('Bookmark cleared');
+  }
+
+  function restoreBookmark(workId, silent) {
+    var bm = getBookmark(workId);
+    if (!bm) {
+      if (!silent) flash('No bookmark yet');
+      return;
+    }
+    goToSection(bm.section || 0, bm.para != null ? bm.para : null, true);
+    if (!silent) flash('Returned to bookmark');
+  }
+
+  function applyBookmarkMarker(workId) {
+    document.querySelectorAll('.bookmark-marker').forEach(function (m) { m.remove(); });
+    var bm = getBookmark(workId);
+    if (!bm || bm.section !== currentSection) return;
+    var el = null;
+    if (bm.para != null) el = document.getElementById(paraId(bm.section, bm.para));
+    if (!el) el = document.getElementById('s' + bm.section);
+    if (!el) return;
+    var mark = document.createElement('span');
+    mark.className = 'bookmark-marker';
+    mark.title = bm.label || 'Your bookmark';
+    el.insertBefore(mark, el.firstChild);
+  }
+
+  function applyBookmarkMarkers(workId) {
+    applyBookmarkMarker(workId);
+  }
+
+  function updateReadProgress() {
+    var bar = document.getElementById('read-progress-bar');
+    if (!bar) return;
+    var doc = document.documentElement;
+    var scrollTop = window.scrollY || doc.scrollTop || 0;
+    var height = (doc.scrollHeight - doc.clientHeight) || 1;
+    var pct = Math.min(100, Math.max(0, (scrollTop / height) * 100));
+    // In section mode, blend section index + in-section scroll
+    var chapters = (currentWork && currentWork.chapters) || [];
+    if (chapters.length > 1 && sectionMode) {
+      var local = Math.min(1, scrollTop / Math.max(1, height));
+      pct = Math.min(100, ((currentSection + local) / chapters.length) * 100);
+    }
+    bar.style.width = pct.toFixed(2) + '%';
+  }
+
+  function onReadScroll() {
+    updateReadProgress();
+    updateHereLabel();
+    scheduleSaveProgress();
+  }
+
+  function citationUrl(si, pi) {
+    const base = location.href.split('#')[0];
+    const hash = pi != null ? paraId(si, pi) : ('s' + si);
+    return base + '#' + hash;
+  }
+
+  function copyCite() {
+    const bar = document.getElementById('cite-bar');
+    const si = parseInt(bar.dataset.section || currentSection, 10);
+    const pi = bar.dataset.para !== '' && bar.dataset.para != null
+      ? parseInt(bar.dataset.para, 10) : null;
+    const url = citationUrl(si, pi);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () { flash('Citation link copied'); });
+    } else {
+      flash(url);
+    }
+  }
+
+  /* ---------- Selection popup ---------- */
+  const popup = document.getElementById('hl-popup');
+  function hidePopup() { popup.classList.remove('is-visible'); }
+  function showPopupNearSelection() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) { hidePopup(); return; }
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    if (!rect || (rect.width === 0 && rect.height === 0)) { hidePopup(); return; }
+    popup.style.left = Math.min(window.innerWidth - 200, Math.max(8, rect.left + rect.width / 2 - 90)) + 'px';
+    popup.style.top = Math.max(8, rect.top - 44) + 'px';
+    popup.classList.add('is-visible');
+  }
+  document.addEventListener('mouseup', function () { setTimeout(showPopupNearSelection, 10); });
+  document.addEventListener('scroll', hidePopup, true);
+  document.getElementById('btn-hl').addEventListener('click', saveHighlightFromSelection);
+  document.getElementById('btn-hl-clear-sel').addEventListener('click', function () {
+    const sel = window.getSelection();
+    if (!sel || !currentWorkId) return;
+    const node = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+    const p = node && node.closest && node.closest('p.hl-selectable');
+    if (!p) return;
+    const map = loadJSON(storageKey(currentWorkId, 'hl'), {});
+    delete map[p.id];
+    saveJSON(storageKey(currentWorkId, 'hl'), map);
+    p.textContent = p.textContent;
+    hidePopup();
+    flash('Marks cleared in paragraph');
+  });
+  document.getElementById('btn-cite-para').addEventListener('click', function () {
+    const sel = window.getSelection();
+    const node = sel && sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+    const p = node && node.closest && node.closest('p.hl-selectable');
+    if (!p) return;
+    const si = parseInt(p.getAttribute('data-ch'), 10);
+    const pi = parseInt(p.getAttribute('data-p'), 10);
+    updateCiteBar(si, pi);
+    const url = citationUrl(si, pi);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () { flash('Paragraph link copied'); });
+    }
+    hidePopup();
+  });
+
+
+  /* ---------- Reader comfort: size, measure, focus, resume, keys ---------- */
+  var READER_FS_KEY = 'melius_reader_fs';
+  var READER_MEASURE_KEY = 'melius_reader_measure';
+  var FS_STEPS = [0.92, 1.0, 1.08, 1.16, 1.28, 1.4];
+  var readerFsIndex = 2;
+  var readerMeasure = 'normal'; // narrow | normal | wide
+
+  function applyReaderPrefs() {
+    var fs = FS_STEPS[readerFsIndex] || 1.08;
+    document.documentElement.style.setProperty('--reader-fs', fs + 'rem');
+    document.body.classList.remove('reader-narrow', 'reader-wide');
+    if (readerMeasure === 'narrow') document.body.classList.add('reader-narrow');
+    if (readerMeasure === 'wide') document.body.classList.add('reader-wide');
+    var mb = document.getElementById('btn-measure');
+    if (mb) {
+      mb.textContent = readerMeasure === 'narrow' ? 'Narrow' : (readerMeasure === 'wide' ? 'Wide' : 'Width');
+      mb.classList.toggle('is-on', readerMeasure !== 'normal');
+    }
+  }
+
+  function loadReaderPrefs() {
+    try {
+      var fs = parseInt(localStorage.getItem(READER_FS_KEY), 10);
+      if (!isNaN(fs) && fs >= 0 && fs < FS_STEPS.length) readerFsIndex = fs;
+      var m = localStorage.getItem(READER_MEASURE_KEY);
+      if (m === 'narrow' || m === 'wide' || m === 'normal') readerMeasure = m;
+    } catch (e) {}
+    applyReaderPrefs();
+  }
+
+  function bumpFont(dir) {
+    readerFsIndex = Math.max(0, Math.min(FS_STEPS.length - 1, readerFsIndex + dir));
+    try { localStorage.setItem(READER_FS_KEY, String(readerFsIndex)); } catch (e) {}
+    applyReaderPrefs();
+    flash(Math.round(FS_STEPS[readerFsIndex] * 100) + '% type');
+  }
+
+  function cycleMeasure() {
+    readerMeasure = readerMeasure === 'normal' ? 'wide' : (readerMeasure === 'wide' ? 'narrow' : 'normal');
+    try { localStorage.setItem(READER_MEASURE_KEY, readerMeasure); } catch (e) {}
+    applyReaderPrefs();
+    flash(readerMeasure === 'normal' ? 'Default width' : (readerMeasure + ' measure'));
+  }
+
+  function setFocusMode(on) {
+    document.body.classList.toggle('reader-focus', !!on);
+    var btn = document.getElementById('btn-focus');
+    if (btn) btn.classList.toggle('is-on', !!on);
+    if (on) flash('Focus mode · Esc to exit');
+  }
+
+  function toggleFocusMode() {
+    setFocusMode(!document.body.classList.contains('reader-focus'));
+  }
+
+  function saveProgress() {
+    if (!currentWorkId) return;
+    var place = typeof visiblePlace === 'function' ? visiblePlace() : { section: currentSection, para: null };
+    saveJSON(storageKey(currentWorkId, 'progress'), {
+      section: place.section != null ? place.section : currentSection,
+      para: place.para != null ? place.para : null,
+      scroll: window.scrollY,
+      at: Date.now()
+    });
+  }
+
+  function restoreProgress(workId) {
+    return loadJSON(storageKey(workId, 'progress'), null);
+  }
+
+  function copyCurrentSection() {
+    if (!currentWork) return;
+    var ch = (currentWork.chapters || [])[currentSection];
+    if (!ch) return;
+    var parts = [];
+    if (currentWork.title) parts.push(currentWork.title);
+    if (currentWork.author) parts.push(currentWork.author);
+    if (ch.heading) parts.push(ch.heading);
+    parts.push('');
+    (ch.paragraphs || []).forEach(function (para) {
+      parts.push(String(para || '').replace(/\s+/g, ' ').trim());
+      parts.push('');
+    });
+    var text = parts.join('\n').trim();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        flash('Section copied');
+      }).catch(function () { flash('Copy failed'); });
+    } else {
+      flash('Clipboard unavailable');
+    }
+  }
+
+  var progressTimer = null;
+  function scheduleSaveProgress() {
+    clearTimeout(progressTimer);
+    progressTimer = setTimeout(saveProgress, 400);
+  }
+
+
+  document.getElementById('btn-bookmark').addEventListener('click', saveBookmark);
+  var bmSave = document.getElementById('bm-save-here');
+  if (bmSave) bmSave.addEventListener('click', saveBookmark);
+  var bmGoto = document.getElementById('bm-goto-here');
+  if (bmGoto) bmGoto.addEventListener('click', function () { restoreBookmark(currentWorkId, false); });
+  var bmClear = document.getElementById('bm-clear-here');
+  if (bmClear) bmClear.addEventListener('click', clearBookmark);
+  var bmToggle = document.getElementById('bm-rail-toggle');
+  if (bmToggle) {
+    bmToggle.addEventListener('click', function () {
+      var rail = document.getElementById('bm-rail');
+      if (!rail) return;
+      rail.classList.toggle('collapsed');
+      bmToggle.textContent = rail.classList.contains('collapsed') ? '+' : '\u2212';
+      bmToggle.title = rail.classList.contains('collapsed') ? 'Expand' : 'Collapse';
+    });
+  }
+  window.addEventListener('scroll', onReadScroll, { passive: true });
+  window.addEventListener('resize', updateReadProgress);
+  document.getElementById('btn-goto-bookmark').addEventListener('click', function () {
+    restoreBookmark(currentWorkId, false);
+  });
+  document.getElementById('btn-clear-hl').addEventListener('click', function () {
+    if (confirm('Clear all highlights in this work?')) clearHighlightsInWork();
+  });
+
+  loadReaderPrefs();
+  var btnFsUp = document.getElementById('btn-fs-up');
+  var btnFsDown = document.getElementById('btn-fs-down');
+  if (btnFsUp) btnFsUp.addEventListener('click', function () { bumpFont(1); });
+  if (btnFsDown) btnFsDown.addEventListener('click', function () { bumpFont(-1); });
+  var btnMeasure = document.getElementById('btn-measure');
+  if (btnMeasure) btnMeasure.addEventListener('click', cycleMeasure);
+  var btnFocus = document.getElementById('btn-focus');
+  if (btnFocus) btnFocus.addEventListener('click', toggleFocusMode);
+  var focusExit = document.getElementById('focus-exit');
+  if (focusExit) focusExit.addEventListener('click', function () { setFocusMode(false); });
+  var btnCopySec = document.getElementById('btn-copy-section');
+  if (btnCopySec) btnCopySec.addEventListener('click', copyCurrentSection);
+  var btnPrint = document.getElementById('btn-print');
+  if (btnPrint) btnPrint.addEventListener('click', function () { window.print(); });
+
+  window.addEventListener('scroll', scheduleSaveProgress, { passive: true });
+  window.addEventListener('beforeunload', saveProgress);
+
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target && e.target.isContentEditable)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'Escape') {
+      if (document.body.classList.contains('reader-focus')) {
+        setFocusMode(false);
+        e.preventDefault();
+      }
+      return;
+    }
+    if (e.key === 'ArrowLeft' || e.key === 'p' || e.key === 'P') {
+      if (currentSection > 0) { goToSection(currentSection - 1, null, true); e.preventDefault(); }
+      return;
+    }
+    if (e.key === 'ArrowRight' || e.key === 'n' || e.key === 'N') {
+      var n = (currentWork && currentWork.chapters || []).length;
+      if (currentSection < n - 1) { goToSection(currentSection + 1, null, true); e.preventDefault(); }
+      return;
+    }
+    if (e.key === 'b' || e.key === 'B') {
+      saveBookmark();
+      e.preventDefault();
+      return;
+    }
+    if (e.key === 'f' || e.key === 'F') {
+      toggleFocusMode();
+      e.preventDefault();
+      return;
+    }
+    if (e.key === 't' || e.key === 'T') {
+      var side = document.getElementById('work-side');
+      if (side) side.classList.toggle('open');
+      e.preventDefault();
+      return;
+    }
+    if (e.key === '+' || e.key === '=') { bumpFont(1); e.preventDefault(); return; }
+    if (e.key === '-' || e.key === '_') { bumpFont(-1); e.preventDefault(); return; }
+  });
+  document.getElementById('btn-side').addEventListener('click', function () {
+    document.getElementById('work-side').classList.toggle('open');
+  });
+  document.getElementById('btn-prev').addEventListener('click', function () {
+    goToSection(currentSection - 1, null, true);
+  });
+  document.getElementById('btn-next').addEventListener('click', function () {
+    goToSection(currentSection + 1, null, true);
+  });
+  document.getElementById('btn-copy-cite').addEventListener('click', copyCite);
+
+  function render() {
+    const id = qs('id');
+    const root = document.getElementById('work-root');
+    currentWorkId = id;
+
+    
+    // Merge magisterial texts into WORKS
+    window.WORKS = window.WORKS || {};
+    if (window.MAGISTERIUM_TEXTS) {
+      Object.keys(window.MAGISTERIUM_TEXTS).forEach(function (k) {
+        window.WORKS[k] = window.MAGISTERIUM_TEXTS[k];
+      });
+    }
+
+    if (!id || !window.WORKS || !window.WORKS[id]) {
+      const available = window.WORKS
+        ? Object.keys(window.WORKS).slice(0, 12).join(', ') + '…'
+        : '(works failed to load)';
+      root.innerHTML =
+        '<div class="missing"><h1>Work not found</h1><p>No text is loaded for <code>' +
+        escapeHtml(id || '') + '</code>.</p><p>Available keys include: ' + escapeHtml(available) +
+        '</p><p><a href="../magisterium.html">Magisterium</a> · <a href="../figures.html">Figures</a></p></div>';
+      document.getElementById('work-toc').innerHTML = '';
+      document.getElementById('cite-bar').hidden = true;
+      document.title = 'Work not found — Melius Illuminare';
+      return;
+    }
+
+    currentWork = window.WORKS[id];
+    document.title = (currentWork.title || id) + ' — Melius Illuminare';
+    sectionMode = shouldUseSectionMode(currentWork);
+
+    const params = new URLSearchParams(window.location.search);
+    const hashInfo = parseHash();
+
+    if (hashInfo) {
+      currentSection = hashInfo.section || 0;
+      renderSection();
+      if (hashInfo.para != null) {
+        setTimeout(function () { highlightTarget(paraId(hashInfo.section, hashInfo.para)); }, 60);
+      } else {
+        setTimeout(function () {
+          const el = document.getElementById('s' + hashInfo.section);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 40);
+      }
+      return;
+    }
+
+    // Auto-resume last place (progress), unless ?fresh=1
+    if (params.get('fresh') !== '1') {
+      const prog = restoreProgress(id);
+      if (prog && prog.section != null) {
+        currentSection = prog.section;
+        renderSection();
+        if (prog.para != null) {
+          setTimeout(function () { highlightTarget(paraId(prog.section, prog.para)); }, 80);
+        } else if (prog.scroll) {
+          setTimeout(function () { window.scrollTo(0, prog.scroll); }, 40);
+        }
+        flash('Resumed where you left off');
+        return;
+      }
+    }
+
+    currentSection = 0;
+    renderSection();
+  }
+
+  window.addEventListener('hashchange', function () {
+    const info = parseHash();
+    if (!info || !currentWork) return;
+    if (info.section !== currentSection) {
+      goToSection(info.section, info.para, false);
+    } else if (info.para != null) {
+      highlightTarget(paraId(info.section, info.para));
+    }
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', render);
+  } else {
+    render();
+  }
+})();
+</script>
+<script src="../js/site-nav.js"></script>
+<script src="../js/ambient-dust.js"></script>
+<script src="../js/epic-reveal.js"></script>
+
+</body>
+</html>

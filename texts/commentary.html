@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter Commentary — Melius Illuminare</title>
+<meta name="description" content="Public-domain chapter commentary for Old and New Testament is shown on the Sacred Texts Bible reader — one primary voice per chapter.">
+<link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/site-polish.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+  <link rel="stylesheet" href="../css/sacred-objects.css">
+<style>
+  .comm-index { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .comm-index h1 { margin: 0 0 0.5rem; font-size: clamp(1.6rem, 3vw, 2.1rem); }
+  .comm-index .lead { color: var(--ink-dim); line-height: 1.65; margin: 0 0 1.5rem; }
+  .comm-cta {
+    display: inline-block; margin: 0.5rem 0 1.75rem; padding: 0.65rem 1.2rem;
+    border: 1px solid rgba(201,162,39,0.4); border-radius: 999px;
+    color: var(--gold-glow); text-decoration: none; font-size: 0.9rem;
+    letter-spacing: 0.04em;
+  }
+  .comm-cta:hover { background: rgba(201,162,39,0.08); }
+  .comm-index h2 {
+    font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold-glow); margin: 1.75rem 0 0.75rem;
+  }
+  .seed-list { list-style: none; margin: 0; padding: 0; columns: 2; gap: 1.5rem; }
+  @media (max-width: 560px) { .seed-list { columns: 1; } }
+  .seed-list li { margin: 0 0 0.45rem; break-inside: avoid; }
+  .seed-list a {
+    color: var(--ink); text-decoration: none; border-bottom: 1px solid transparent;
+  }
+  .seed-list a:hover { color: var(--gold-glow); border-bottom-color: var(--gold); }
+  .seed-list .voice { color: var(--ink-dim); font-size: 0.88rem; }
+  .note {
+    margin-top: 2rem; padding: 1rem 1.1rem; border: 1px dashed var(--hairline);
+    border-radius: 4px; font-size: 0.9rem; color: var(--ink-dim); line-height: 1.55;
+  }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html" class="wordmark">MELIUS&nbsp;ILLUMINARE</a>
+  <nav>
+    <a href="../figures.html">Figures</a>
+    <a href="../concepts.html">Concepts</a>
+    <a href="../magisterium.html">Magisterium</a>
+      <a href="../papacy.html">Papacy</a>
+      <a href="../prayer.html">Prayer</a>
+      <a href="../mass.html">Mass</a>
+    <a href="../spiritualities.html">Spiritualities</a>
+    <a href="../theological-tree.html">Theological Tree</a>
+    <a href="bible.html">Sacred Texts</a>
+    <a href="../store.html">Store</a>
+      <a href="../about.html">About</a>
+  </nav>
+</header>
+
+<div class="comm-index">
+  <h1>Chapter commentary</h1>
+  <p class="lead">
+    Each seeded New Testament chapter has <strong>one primary public-domain commentator</strong>
+    (chiefly Chrysostom and Augustine, from NPNF/ANF). Commentary appears as a panel
+    directly under the chapter text on the Sacred Texts Bible reader.
+  </p>
+  <a class="comm-cta" href="bible.html#JHN.1.kjv">Open Sacred Texts — start at John 1 →</a>
+
+  <h2>Seeded chapters</h2>
+  <ul class="seed-list" id="seed-dynamic"></ul>
+
+  <div class="note">
+    Old Testament commentary is not seeded yet. Empty NT chapters show a short notice
+    on the Bible page. Sources: NPNF Homilies of Chrysostom, Augustine’s Tractates,
+    Leo’s sermons, Victorinus on the Apocalypse, and related public-domain lines.
+    Not modern study-Bible notes.
+  </div>
+</div>
+<script src="../js/nt-commentary.js"></script>
+<script src="../js/ot-commentary.js"></script>
+<script>
+(function () {
+  var list = document.getElementById("seed-dynamic");
+  if (!list) return;
+  var all = Object.assign({}, window.OT_COMMENTARY || {}, window.NT_COMMENTARY || {});
+  var keys = Object.keys(all).sort(function (a, b) {
+    var pa = a.split("."), pb = b.split(".");
+    if (pa[0] !== pb[0]) return pa[0] < pb[0] ? -1 : 1;
+    return (+pa[1] || 0) - (+pb[1] || 0);
+  });
+  var html = "";
+  keys.forEach(function (k) {
+    var c = all[k];
+    var parts = k.split(".");
+    html += '<li><a href="bible.html#' + k + '.dra">' + k.replace(".", " ") +
+      '</a> <span class="voice">— ' + (c.name || "") + "</span></li>";
+  });
+  list.innerHTML = html || "<li>Loading…</li>";
+})();
+</script>
+
+<footer class="site-footer">
+  <p><a href="bible.html">Bible reader</a> · <a href="summa.html">Summa Theologiae</a> · <a href="work.html?id=aquinas-contra-gentiles">Contra Gentiles</a> · <a href="../about.html">Sourcing</a></p>
+</footer>
+
+<script src="../js/nt-commentary.js"></script>
+<script>
+(function () {
+  const BOOK_NAMES = {
+    MAT: 'Matthew', MRK: 'Mark', LUK: 'Luke', JHN: 'John', ACT: 'Acts',
+    ROM: 'Romans', '1CO': '1 Corinthians', '2CO': '2 Corinthians', GAL: 'Galatians',
+    EPH: 'Ephesians', PHP: 'Philippians', COL: 'Colossians', HEB: 'Hebrews',
+    JAS: 'James', '1PE': '1 Peter', '1JN': '1 John', REV: 'Revelation'
+  };
+  const data = window.NT_COMMENTARY || {};
+  const keys = Object.keys(data).sort(function (a, b) {
+    const [ba, ca] = a.split('.');
+    const [bb, cb] = b.split('.');
+    const order = Object.keys(BOOK_NAMES);
+    const ia = order.indexOf(ba);
+    const ib = order.indexOf(bb);
+    if (ia !== ib) return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    return (+ca) - (+cb);
+  });
+  const ul = document.getElementById('seed-list');
+  ul.innerHTML = keys.map(function (k) {
+    const c = data[k];
+    const parts = k.split('.');
+    const label = (BOOK_NAMES[parts[0]] || parts[0]) + ' ' + parts[1];
+    return '<li><a href="bible.html#' + k + '.kjv">' + label +
+      '</a> <span class="voice">— ' + (c.name || '') + '</span></li>';
+  }).join('');
+})();
+</script>
+<script src="../js/site-nav.js"></script>
+<script src="../js/ambient-dust.js"></script>
+<script src="../js/epic-reveal.js"></script>
+
+</body>
+</html>

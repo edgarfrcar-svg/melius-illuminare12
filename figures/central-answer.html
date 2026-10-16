@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central Answer — Melius Illuminare</title>
+<meta name="description" content="A full treatise answering a theologian's central question from their own sources.">
+<link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/site-polish.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+  <link rel="stylesheet" href="../css/sacred-objects.css">
+<style>
+  .ca-app {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1180px;
+    margin: 0 auto;
+    min-height: calc(100vh - 140px);
+  }
+  @media (max-width: 900px) {
+    .ca-app { grid-template-columns: 1fr; }
+    .ca-side { display: none; }
+    .ca-side.is-open {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: var(--bg-deep, #0a0b0e);
+      overflow-y: auto;
+      padding: 1.25rem;
+    }
+  }
+  .ca-side {
+    border-right: 1px solid var(--hairline);
+    background: var(--bg-deep, rgba(8,9,12,0.98));
+    padding: 1.25rem 1rem 2.5rem;
+    position: sticky;
+    top: 70px;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+  }
+  .ca-side .ca-side-label {
+    font-family: var(--serif-display);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 1.1rem 0 0.45rem;
+  }
+  .ca-side .ca-side-label:first-child { margin-top: 0.15rem; }
+  .ca-side a {
+    display: block;
+    color: var(--ink-dim);
+    text-decoration: none;
+    font-size: 0.9rem;
+    line-height: 1.35;
+    padding: 0.38rem 0.5rem;
+    border-radius: 3px;
+    margin-bottom: 0.15rem;
+  }
+  .ca-side a:hover,
+  .ca-side a.is-active {
+    color: var(--gold-glow, #ffd98e);
+    background: rgba(201,162,39,0.08);
+  }
+  .ca-side .ca-back {
+    border: 1px solid var(--hairline);
+    margin-bottom: 0.85rem;
+    color: var(--ink);
+  }
+  .ca-side .ca-back:hover {
+    border-color: var(--gold);
+  }
+
+  .ca-main {
+    padding: 1.75rem 2rem 4.5rem;
+    max-width: 44rem;
+  }
+  @media (max-width: 900px) {
+    .ca-main { padding: 1.1rem 1.15rem 3.5rem; }
+  }
+
+  .ca-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1.35rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--hairline);
+    position: sticky;
+    top: 70px;
+    z-index: 5;
+    background: var(--bg);
+  }
+  .ca-toolbar button,
+  .ca-toolbar a.btn-quiet {
+    font-family: var(--serif-body);
+    font-size: 0.86rem;
+    background: var(--bg-panel);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+    padding: 0.4rem 0.75rem;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .ca-toolbar button:hover,
+  .ca-toolbar a.btn-quiet:hover {
+    border-color: var(--gold);
+    color: var(--gold-glow, #ffd98e);
+  }
+
+  .ca-meta .eyebrow {
+    font-family: var(--serif-display);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .ca-meta h1 {
+    margin: 0.45rem 0 0.55rem;
+    font-size: clamp(1.55rem, 3.2vw, 2.15rem);
+    line-height: 1.2;
+  }
+  .ca-meta .figure-link {
+    display: inline-block;
+    margin-bottom: 1.25rem;
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+  .ca-meta .figure-link:hover {
+    color: var(--gold-glow, #ffd98e);
+    border-bottom-color: rgba(201,162,39,0.4);
+  }
+
+  .ca-question-block {
+    margin: 0 0 1.75rem;
+    padding: 1.25rem 1.35rem;
+    border-left: 3px solid var(--gold);
+    background:
+      linear-gradient(90deg, rgba(201,162,39,0.08), transparent 75%),
+      var(--bg-panel, rgba(16,18,22,0.5));
+    border-radius: 0 6px 6px 0;
+  }
+  .ca-question-block .q-label {
+    display: block;
+    font-family: var(--serif-display);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .ca-question-block p {
+    margin: 0;
+    font-size: clamp(1.12rem, 2.3vw, 1.35rem);
+    font-style: italic;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+
+  .ca-lead {
+    font-size: 1.08rem;
+    line-height: 1.75;
+    color: var(--ink);
+    margin: 0 0 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .ca-section {
+    margin: 0 0 2rem;
+    scroll-margin-top: 140px;
+  }
+  .ca-section h2 {
+    font-family: var(--serif-display);
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--gold-glow, var(--gold));
+    margin: 0 0 0.75rem;
+    letter-spacing: 0.02em;
+  }
+  .ca-section p {
+    margin: 0 0 0.95rem;
+    line-height: 1.78;
+    color: var(--ink-dim);
+  }
+  .ca-section p:last-child { margin-bottom: 0; }
+
+  .ca-sources {
+    margin-top: 2.5rem;
+    padding: 1.35rem 1.4rem;
+    background: var(--bg-panel, rgba(16,18,22,0.55));
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    scroll-margin-top: 140px;
+  }
+  .ca-sources h2 {
+    font-family: var(--serif-display);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 0.85rem;
+  }
+  .ca-sources ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ca-sources li {
+    margin: 0 0 0.6rem;
+    font-size: 0.94rem;
+    line-height: 1.5;
+    color: var(--ink-dim);
+  }
+  .ca-sources li:last-child { margin-bottom: 0; }
+  .ca-sources .cite {
+    color: var(--ink);
+    font-style: italic;
+  }
+
+
+
+/* Central Answer — objections */
+.ca-objections {
+  margin: 2.5rem 0 2rem;
+  scroll-margin-top: 140px;
+}
+.ca-objections-title {
+  font-family: var(--serif-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 1.25rem;
+  font-weight: 500;
+}
+.ca-objection {
+  margin: 0 0 1.75rem;
+  padding: 1.2rem 1.3rem;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  background: var(--bg-panel, rgba(16,18,22,0.45));
+  scroll-margin-top: 140px;
+}
+.ca-objection h3 {
+  margin: 0 0 0.55rem;
+  font-size: 1rem;
+}
+.ca-obj-num {
+  font-family: var(--serif-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.ca-obj-text {
+  margin: 0 0 0.9rem;
+  line-height: 1.7;
+  color: var(--ink-dim);
+  font-style: italic;
+}
+.ca-reply-label {
+  font-family: var(--serif-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-glow, var(--gold));
+  margin: 0.85rem 0 0.45rem;
+  font-weight: 500;
+}
+.ca-reply-text {
+  margin: 0 0 0.65rem;
+  line-height: 1.75;
+  color: var(--ink);
+}
+.ca-reply-text:last-child { margin-bottom: 0; }
+
+  .ca-missing {
+    padding: 3rem 1.5rem;
+    color: var(--ink-dim);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="../index.html" class="wordmark">MELIUS&nbsp;ILLUMINARE</a>
+  <nav>
+    <a href="../figures.html">Figures</a>
+    <a href="../concepts.html">Concepts</a>
+    <a href="../magisterium.html">Magisterium</a>
+      <a href="../papacy.html">Papacy</a>
+      <a href="../prayer.html">Prayer</a>
+      <a href="../mass.html">Mass</a>
+    <a href="../spiritualities.html">Spiritualities</a>
+    <a href="../theological-tree.html">Theological Tree</a>
+    <a href="../texts/bible.html">Sacred Texts</a>
+    <a href="../store.html">Store</a>
+      <a href="../about.html">About</a>
+  </nav>
+</header>
+
+<div class="ca-app" id="ca-app">
+  <aside class="ca-side" id="ca-side" aria-label="Treatise sections"></aside>
+  <main class="ca-main" id="ca-main">
+    <p class="ca-missing">Loading…</p>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>Central Answer reader &middot; treatise grounded in public-domain sources &middot; <a href="../figures.html">Figures</a></p>
+</footer>
+
+<script src="../js/profile-data.js"></script>
+<script src="../js/central-answers.js"></script>
+<script src="../js/central-answer.js"></script>
+<script src="../js/site-nav.js"></script>
+<script src="../js/ambient-dust.js"></script>
+<script src="../js/epic-reveal.js"></script>
+
+</body>
+</html>

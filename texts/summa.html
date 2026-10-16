@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summa Theologiae — Melius Illuminare</title>
+<meta name="description" content="Read the Summa Theologiae article by article: objections, sed contra, response, replies, and commentary notes. Dominican Fathers translation.">
+<link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/site-polish.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+  <link rel="stylesheet" href="../css/sacred-objects.css">
+<style>
+  .summa-app {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: calc(100vh - 140px);
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  @media (max-width: 900px) {
+    .summa-app { grid-template-columns: 1fr; }
+    .summa-sidebar { display: none; }
+    .summa-sidebar.open {
+      display: block; position: fixed; inset: 0; z-index: 80;
+      background: var(--bg-deep); overflow-y: auto; padding: 1.25rem;
+    }
+  }
+  .summa-sidebar {
+    border-right: 1px solid var(--hairline);
+    background: var(--bg-deep);
+    padding: 1.1rem 0.85rem 2rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 70px);
+    position: sticky;
+    top: 70px;
+  }
+  .summa-sidebar .side-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-glow);
+    padding: 0.3rem 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+  .part-btn, .q-btn {
+    display: block; width: 100%; text-align: left;
+    background: none; border: none;
+    font-family: var(--serif-body); cursor: pointer; border-radius: 3px;
+  }
+  .part-btn {
+    color: var(--ink); font-size: 0.92rem;
+    padding: 0.45rem 0.55rem; margin-top: 0.5rem;
+  }
+  .part-btn:hover, .part-btn.active {
+    background: rgba(201,162,39,0.1); color: var(--gold-glow);
+  }
+  .part-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .treatise-label {
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-glow);
+    padding: 0.75rem 0.55rem 0.2rem;
+    margin-top: 0.35rem;
+  }
+  .part-count {
+    font-size: 0.75rem;
+    color: var(--ink-dim);
+    padding: 0.15rem 0.55rem 0.55rem;
+  }
+  #summa-search, #summa-jump {
+    width: calc(100% - 1rem);
+    margin: 0 0.5rem 0.4rem;
+    box-sizing: border-box;
+    font-family: var(--serif-body);
+    font-size: 0.85rem;
+    background: var(--bg-panel);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+    padding: 0.4rem 0.55rem;
+    border-radius: 3px;
+  }
+  .summa-loading { color: var(--ink-dim); font-style: italic; padding: 0.5rem 0.55rem; }
+  .q-btn {
+    color: var(--ink-dim); font-size: 0.86rem;
+    padding: 0.32rem 0.55rem 0.32rem 1rem;
+  }
+  .q-btn:hover, .q-btn.active {
+    color: var(--gold-glow); background: rgba(236,229,212,0.05);
+  }
+  .summa-main { padding: 1.5rem 2rem 4rem; max-width: 760px; }
+  @media (max-width: 900px) { .summa-main { padding: 1rem 1.1rem 3rem; } }
+
+  .summa-toolbar {
+    display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;
+    margin-bottom: 1.4rem; padding-bottom: 1rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .summa-toolbar button, .summa-toolbar select {
+    font-family: var(--serif-body); font-size: 0.9rem;
+    background: var(--bg-panel); color: var(--ink);
+    border: 1px solid var(--hairline); padding: 0.45rem 0.75rem;
+    border-radius: 3px; cursor: pointer;
+  }
+  .summa-toolbar button:hover { border-color: var(--gold); color: var(--gold-glow); }
+  .summa-toolbar select { max-width: min(340px, 100%); }
+  .summa-crumb {
+    font-size: 0.82rem; color: var(--ink-dim);
+    letter-spacing: 0.04em; margin-bottom: 0.75rem;
+  }
+  .summa-crumb strong { color: var(--gold-glow); font-weight: 500; }
+  .summa-q-title {
+    font-size: clamp(1.35rem, 3vw, 1.85rem);
+    margin: 0 0 0.35rem; line-height: 1.25;
+  }
+  .summa-art-title {
+    font-size: 1.15rem; color: var(--gold-glow);
+    font-style: italic; margin: 0 0 1.5rem;
+  }
+
+  .art-block {
+    margin-bottom: 1.25rem;
+    border-left: 3px solid rgba(236,229,212,0.12);
+    padding: 0.85rem 1rem 0.95rem 1.15rem;
+    background: transparent;
+    border-radius: 0 4px 4px 0;
+    transition: border-color 0.35s ease, background 0.35s ease, box-shadow 0.35s ease;
+  }
+  .art-label {
+    font-family: var(--serif-display);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin: 0 0 0.45rem;
+    color: var(--ink-dim);
+    transition: color 0.35s ease, text-shadow 0.35s ease;
+  }
+  .art-block p {
+    margin: 0 0 0.65rem; line-height: 1.7; color: var(--ink);
+    transition: text-shadow 0.35s ease, color 0.35s ease;
+  }
+  .art-block p:last-child { margin-bottom: 0; }
+
+  .art-block.objection { border-left-color: rgba(196,120,90,0.35); }
+  .art-block.sed-contra { border-left-color: rgba(138,160,212,0.35); }
+  .art-block.response { border-left-color: rgba(201,162,39,0.4); }
+  .art-block.reply { border-left-color: rgba(143,173,122,0.35); }
+
+  .art-block.objection:hover {
+    border-left-color: #c4785a;
+    background: rgba(196,120,90,0.06);
+    box-shadow: inset 0 0 24px rgba(196,120,90,0.07);
+  }
+  .art-block.objection:hover .art-label {
+    color: #f0b89a;
+    text-shadow: 0 0 12px rgba(224,164,138,0.55), 0 0 28px rgba(196,120,90,0.35);
+  }
+  .art-block.objection:hover p { text-shadow: 0 0 18px rgba(196,120,90,0.22); }
+
+  .art-block.sed-contra:hover {
+    border-left-color: #8aa0d4;
+    background: rgba(138,160,212,0.07);
+    box-shadow: inset 0 0 24px rgba(138,160,212,0.08);
+  }
+  .art-block.sed-contra:hover .art-label {
+    color: #c5d2f5;
+    text-shadow: 0 0 12px rgba(180,196,234,0.55), 0 0 28px rgba(138,160,212,0.35);
+  }
+  .art-block.sed-contra:hover p { text-shadow: 0 0 18px rgba(138,160,212,0.25); }
+
+  .art-block.response:hover {
+    border-left-color: var(--gold);
+    background: rgba(201,162,39,0.07);
+    box-shadow: inset 0 0 24px rgba(201,162,39,0.08);
+  }
+  .art-block.response:hover .art-label {
+    color: var(--gold-glow);
+    text-shadow: 0 0 12px rgba(255,217,142,0.55), 0 0 28px rgba(201,162,39,0.4);
+  }
+  .art-block.response:hover p { text-shadow: 0 0 18px rgba(201,162,39,0.22); }
+
+  .art-block.reply:hover {
+    border-left-color: #8fad7a;
+    background: rgba(143,173,122,0.07);
+    box-shadow: inset 0 0 24px rgba(143,173,122,0.08);
+  }
+  .art-block.reply:hover .art-label {
+    color: #c5dfb5;
+    text-shadow: 0 0 12px rgba(181,208,164,0.55), 0 0 28px rgba(143,173,122,0.35);
+  }
+  .art-block.reply:hover p { text-shadow: 0 0 18px rgba(143,173,122,0.22); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .art-block, .art-label, .art-block p { transition: none; }
+  }
+
+  .summa-guide {
+    margin: 0 0 1.5rem;
+    padding: 0.9rem 1.05rem;
+    border: 1px solid var(--hairline);
+    background: var(--bg-panel);
+    border-radius: 4px;
+  }
+  .summa-guide h3 {
+    margin: 0 0 0.4rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-glow);
+  }
+  .summa-guide p { margin: 0; font-size: 0.95rem; line-height: 1.6; color: var(--ink-dim); }
+  .summa-guide .guide-links { margin-top: 0.65rem; font-size: 0.88rem; }
+  .summa-guide a { color: var(--gold-glow); }
+
+  .summa-commentary {
+    margin-top: 2rem;
+    border: 1px solid rgba(160,140,200,0.28);
+    border-radius: 4px;
+    background: rgba(40, 32, 58, 0.35);
+  }
+  .summa-commentary-head {
+    padding: 0.65rem 1.1rem;
+    border-bottom: 1px solid rgba(160,140,200,0.25);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #c4b4e0;
+    display: flex; flex-wrap: wrap; gap: 0.4rem 0.85rem; align-items: baseline;
+  }
+  .summa-commentary-body {
+    padding: 1rem 1.15rem 1.2rem;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  .summa-commentary-body p { margin: 0 0 0.75rem; }
+  .summa-commentary-body p:last-child { margin-bottom: 0; }
+  .summa-commentary-empty {
+    color: var(--ink-dim); font-style: italic;
+  }
+  .summa-commentary .comm-author {
+    font-weight: 600; color: #d4c4f0;
+  }
+
+  .summa-nav-row {
+    display: flex; justify-content: space-between; gap: 1rem;
+    margin-top: 2.5rem; padding-top: 1.25rem;
+    border-top: 1px solid var(--hairline);
+  }
+  .summa-nav-row a {
+    color: var(--ink-dim); text-decoration: none; font-size: 0.92rem;
+  }
+  .summa-nav-row a:hover { color: var(--gold-glow); }
+
+  .summa-legend {
+    margin-top: 2rem; font-size: 0.82rem; color: var(--ink-dim); line-height: 1.55;
+  }
+  .summa-legend span {
+    display: inline-block; width: 10px; height: 10px;
+    border-radius: 2px; margin-right: 0.3rem; vertical-align: middle;
+  }
+
+  #article-body.is-target {
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.4);
+    border-radius: 8px;
+    transition: box-shadow 0.8s ease;
+  }
+  #article-body.is-target.fade {
+    box-shadow: none;
+  }
+  .art-block.is-target {
+    background: rgba(201, 162, 39, 0.18);
+    border-radius: 6px;
+    transition: background 0.8s ease;
+  }
+  .art-block.is-target.fade { background: transparent; }
+
+</style>
+
+<style>
+  .summa-article, .scg-article, .article-body, .qa-body {
+    font-family: var(--serif-body);
+    font-size: 1.1rem;
+    line-height: 1.75;
+    color: #e4dcc8;
+    max-width: 40rem;
+  }
+  .summa-article p, .scg-article p, .article-body p {
+    margin: 0 0 1.05em;
+  }
+  .summa-main, .scg-main, .reader-main {
+    padding: 1.5rem 1.75rem 4rem;
+  }
+  .obj, .sed-contra, .respondeo, .ad {
+    margin: 1.15em 0;
+    padding-left: 0.75rem;
+    border-left: 2px solid rgba(201,162,39,0.25);
+  }
+  .respondeo {
+    border-left-color: rgba(201,162,39,0.55);
+    background: rgba(201,162,39,0.04);
+    padding: 0.85rem 1rem;
+    border-radius: 0 8px 8px 0;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="../index.html" class="wordmark">MELIUS ILLUMINARE</a>
+  <nav>
+    <a href="../figures.html">Figures</a>
+    <a href="../concepts.html">Concepts</a>
+    <a href="../magisterium.html">Magisterium</a>
+      <a href="papacy.html">Papacy</a>
+      <a href="../prayer.html">Prayer</a>
+      <a href="../mass.html">Mass</a>
+    <a href="../spiritualities.html">Spiritualities</a>
+    <a href="../theological-tree.html">Theological Tree</a>
+    <a href="bible.html">Sacred Texts</a>
+    <a href="../store.html">Store</a>
+      <a href="../about.html">About</a>
+  </nav>
+</header>
+
+<div class="summa-app">
+  <aside class="summa-sidebar" id="summa-sidebar">
+    <div class="side-title">Summa Theologiae</div>
+    <p style="font-size:0.8rem;padding:0.2rem 0.55rem 0.6rem;color:var(--ink-dim);margin:0">
+      Also: <a href="work.html?id=aquinas-contra-gentiles" style="color:var(--gold-glow)">Summa Contra Gentiles</a>
+    </p>
+    <p style="font-size:0.8rem;color:var(--ink-dim);padding:0 0.5rem 0.8rem;margin:0;line-height:1.45">
+      Article-by-article reader. Dominican Fathers translation (public domain).
+    </p>
+    <input type="search" id="summa-search" placeholder="Search questions…" aria-label="Search questions">
+    <input type="text" id="summa-jump" placeholder="Jump: Q. 12 a. 4" aria-label="Jump to question and article">
+    <button type="button" class="part-btn active" data-part="prima">I. Prima Pars</button>
+    <button type="button" class="part-btn" data-part="prima-sec">I-II. Prima Secundae</button>
+    <button type="button" class="part-btn" data-part="sec-sec">II-II. Secunda Secundae</button>
+    <button type="button" class="part-btn" data-part="tertia">III. Tertia Pars</button>
+    <div class="part-count" id="part-count"></div>
+    <div id="q-list"></div>
+  </aside>
+
+  <main class="summa-main">
+    <div class="summa-toolbar">
+      <button type="button" id="toggle-side">Parts</button>
+      <select id="article-select" aria-label="Article"></select>
+      <label style="font-size:0.85rem;color:var(--ink-dim);display:flex;align-items:center;gap:0.4rem;margin-left:auto">
+        <input type="checkbox" id="show-guide" checked> Guide
+      </label>
+      <label style="font-size:0.85rem;color:var(--ink-dim);display:flex;align-items:center;gap:0.4rem">
+        <input type="checkbox" id="show-comm" checked> Commentary
+      </label>
+    </div>
+
+    <div class="summa-crumb" id="summa-crumb"></div>
+    <h1 class="summa-q-title" id="q-title"></h1>
+    <p class="summa-art-title" id="art-title"></p>
+
+    <div class="summa-guide" id="summa-guide">
+      <h3>Guide</h3>
+      <p id="guide-text"></p>
+      <div class="guide-links">
+        Related: <a href="../figures/profile.html?id=aquinas">Thomas Aquinas</a>
+        · <a href="../concepts.html">Concepts</a>
+    <a href="../magisterium.html">Magisterium</a>
+      </div>
+    </div>
+
+    <div id="article-body"></div>
+
+    <aside class="summa-commentary" id="summa-commentary">
+      <div class="summa-commentary-head">
+        <span>Commentary</span>
+        <span id="comm-label" style="letter-spacing:0.06em;text-transform:none;font-size:0.85rem;color:var(--ink-dim)"></span>
+      </div>
+      <div class="summa-commentary-body" id="comm-body"></div>
+    </aside>
+
+    <div class="summa-nav-row">
+      <a href="#" id="prev-art">Previous article</a>
+      <a href="#" id="next-art">Next article</a>
+    </div>
+
+    <p class="summa-legend">
+      <span style="background:#c4785a"></span> Objection
+      &nbsp; <span style="background:#8aa0d4"></span> On the contrary (sed contra)
+      &nbsp; <span style="background:var(--gold)"></span> I answer that
+      &nbsp; <span style="background:#8fad7a"></span> Reply
+      <br><br>
+      Translation: Fathers of the English Dominican Province (public domain), via Project Gutenberg.
+      Prima Pars, Prima Secundae, Secunda Secundae, and Tertia Pars — 2,654 articles.
+      Commentary slots are reserved for classical commentators (e.g. Cajetan, John of St Thomas) and short editorial notes.
+    </p>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>
+    <a href="bible.html">Bible</a> ·
+    <a href="../figures/profile.html?id=aquinas">Aquinas</a> ·
+    <a href="../about.html">Sourcing</a>
+  </p>
+</footer>
+
+<script src="../js/summa-data.js"></script>
+<script>
+/**
+ * Summa Theologiae — article reader
+ * Data shape: questions[].articles[] with objections, sedContra, response, replies,
+ * optional guide + commentaries[] { author, text }.
+ * Deep link: summa.html?part=prima&q=1&a=2
+ * Parts I-II / II-II / III are lazy-loaded.
+ */
+const SUMMA_DATA = window.SUMMA_DATA;
+const PART_FILES = {
+  prima: null,
+  "prima-sec": "../js/summa-data-prima-sec.js",
+  "sec-sec": "../js/summa-data-sec-sec.js",
+  tertia: "../js/summa-data-tertia.js"
+};
+const loadingParts = {};
+
+if (!SUMMA_DATA || !SUMMA_DATA.prima) {
+  document.getElementById("article-body").innerHTML = "<p>Summa data failed to load.</p>";
+  throw new Error("SUMMA_DATA missing");
+}
+
+let state = { part: "prima", qIndex: 0, artIndex: 0, filter: "" };
+
+function el(id) { return document.getElementById(id); }
+
+function escapeHtml(s) {
+  const d = document.createElement("div");
+  d.textContent = s == null ? "" : String(s);
+  return d.innerHTML;
+}
+
+function currentPart() {
+  return SUMMA_DATA[state.part];
+}
+
+function parseDeepLink() {
+  const p = new URLSearchParams(window.location.search);
+  const part = p.get("part");
+  if (part && Object.prototype.hasOwnProperty.call(PART_FILES, part)) state.part = part;
+  const q = parseInt(p.get("q"), 10);
+  const a = parseInt(p.get("a"), 10);
+  const data = SUMMA_DATA[state.part];
+  if (data && q) {
+    const qi = data.questions.findIndex(function (x) { return x.id === q; });
+    if (qi >= 0) {
+      state.qIndex = qi;
+      if (a) {
+        const ai = data.questions[qi].articles.findIndex(function (x) { return x.id === a; });
+        if (ai >= 0) state.artIndex = ai;
+      }
+    }
+  }
+}
+
+function ensurePart(part) {
+  if (SUMMA_DATA[part] && SUMMA_DATA[part].questions) return Promise.resolve();
+  const src = PART_FILES[part];
+  if (!src) return Promise.reject(new Error("unknown part"));
+  if (loadingParts[part]) return loadingParts[part];
+  loadingParts[part] = new Promise(function (resolve, reject) {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = function () {
+      if (SUMMA_DATA[part] && SUMMA_DATA[part].questions) resolve();
+      else reject(new Error("part loaded but empty"));
+    };
+    s.onerror = function () { reject(new Error("failed to load " + src)); };
+    document.head.appendChild(s);
+  });
+  return loadingParts[part];
+}
+
+function updateUrl() {
+  const part = currentPart();
+  if (!part) return;
+  const q = part.questions[state.qIndex];
+  const art = q.articles[state.artIndex];
+  const url = new URL(window.location.href);
+  url.searchParams.set("part", state.part);
+  url.searchParams.set("q", String(q.id));
+  url.searchParams.set("a", String(art.id));
+  history.replaceState(null, "", url.pathname + url.search);
+}
+
+function renderSidebar() {
+  const part = currentPart();
+  document.querySelectorAll(".part-btn").forEach(function (btn) {
+    btn.classList.toggle("active", btn.getAttribute("data-part") === state.part);
+  });
+  const list = el("q-list");
+  const count = el("part-count");
+  if (!part) {
+    if (count) count.textContent = "Loading…";
+    if (list) list.innerHTML = "<p class='summa-loading'>Loading this part…</p>";
+    return;
+  }
+  const nArt = part.questions.reduce(function (n, q) { return n + q.articles.length; }, 0);
+  if (count) count.textContent = part.questions.length + " questions · " + nArt + " articles";
+  const filter = (state.filter || "").trim().toLowerCase();
+  let html = "";
+  let lastTreatise = null;
+  part.questions.forEach(function (q, qi) {
+    const hay = ("q. " + q.id + " " + q.title + " " + (q.treatise || "") + " " +
+      q.articles.map(function (a) { return a.title; }).join(" ")).toLowerCase();
+    if (filter && hay.indexOf(filter) === -1) return;
+    if (q.treatise && q.treatise !== lastTreatise) {
+      html += '<div class="treatise-label">' + escapeHtml(q.treatise) + "</div>";
+      lastTreatise = q.treatise;
+    }
+    html += '<button type="button" class="q-btn' + (qi === state.qIndex ? " active" : "") +
+      '" data-qi="' + qi + '">Q. ' + q.id + " — " +
+      escapeHtml(q.title.replace(/^The /, "").replace(/^Of /, "")) + "</button>";
+  });
+  if (!html) html = "<p class='summa-loading'>No questions match.</p>";
+  list.innerHTML = html;
+  list.querySelectorAll(".q-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      state.qIndex = +btn.getAttribute("data-qi");
+      state.artIndex = 0;
+      el("summa-sidebar").classList.remove("open");
+      render();
+    });
+  });
+}
+
+function scrollToArticle() {
+  const body = document.getElementById("article-body");
+  if (!body) return;
+  body.classList.add("is-target");
+  body.scrollIntoView({ behavior: "smooth", block: "start" });
+  setTimeout(function () { body.classList.add("fade"); }, 2200);
+  setTimeout(function () { body.classList.remove("is-target", "fade"); }, 4500);
+}
+
+function render() {
+  const part = currentPart();
+  if (!part) {
+    el("article-body").innerHTML = "<p class='summa-loading'>Loading this part of the Summa…</p>";
+    renderSidebar();
+    return;
+  }
+  if (state.qIndex >= part.questions.length) state.qIndex = 0;
+  const q = part.questions[state.qIndex];
+  if (state.artIndex >= q.articles.length) state.artIndex = 0;
+  const art = q.articles[state.artIndex];
+
+  el("summa-crumb").innerHTML =
+    "<strong>" + escapeHtml(part.label) + "</strong>" +
+    (q.treatise ? " · " + escapeHtml(q.treatise) : "") +
+    " · Question " + q.id + " · Article " + art.id;
+  el("q-title").textContent = "Q. " + q.id + " — " + q.title;
+  el("art-title").textContent = "Article " + art.id + ". " + art.title;
+  el("guide-text").textContent = art.guide || "";
+  el("summa-guide").style.display = el("show-guide").checked && art.guide ? "" : "none";
+
+  const sel = el("article-select");
+  sel.innerHTML = q.articles.map(function (a, i) {
+    let t = a.title.replace(/^Whether /i, "");
+    if (t.length > 52) t = t.slice(0, 50) + "…";
+    return '<option value="' + i + '"' + (i === state.artIndex ? " selected" : "") +
+      ">Art. " + a.id + " — " + escapeHtml(t) + "</option>";
+  }).join("");
+
+  let html = "";
+  (art.objections || []).forEach(function (o, i) {
+    html += '<div class="art-block objection"><div class="art-label">Objection ' + (i + 1) +
+      "</div><p>" + escapeHtml(o) + "</p></div>";
+  });
+  if (art.sedContra) {
+    html += '<div class="art-block sed-contra"><div class="art-label">On the contrary (sed contra)</div><p>' +
+      escapeHtml(art.sedContra) + "</p></div>";
+  }
+  if (art.response) {
+    html += '<div class="art-block response"><div class="art-label">I answer that</div>' +
+      art.response.split(/\n\n+/).map(function (para) {
+        return "<p>" + escapeHtml(para) + "</p>";
+      }).join("") + "</div>";
+  }
+  (art.replies || []).forEach(function (r, i) {
+    html += '<div class="art-block reply"><div class="art-label">Reply to Objection ' + (i + 1) +
+      "</div><p>" + escapeHtml(r) + "</p></div>";
+  });
+  el("article-body").innerHTML = html;
+
+  const comm = art.commentaries || [];
+  const commBox = el("summa-commentary");
+  const showComm = el("show-comm").checked;
+  if (!showComm) {
+    commBox.style.display = "none";
+  } else {
+    commBox.style.display = "";
+    if (!comm.length) {
+      el("comm-label").textContent = "Reserved";
+      el("comm-body").innerHTML =
+        '<p class="summa-commentary-empty">No commentary attached to this article yet. ' +
+        "This panel is reserved for notes in the tradition of classical commentators " +
+        "(Cajetan, John of St Thomas, and others) and short editorial helps.</p>";
+    } else {
+      el("comm-label").textContent = comm.length + " note" + (comm.length > 1 ? "s" : "");
+      el("comm-body").innerHTML = comm.map(function (c) {
+        return '<p><span class="comm-author">' + escapeHtml(c.author) + ".</span> " +
+          escapeHtml(c.text) + "</p>";
+      }).join("");
+    }
+  }
+
+  renderSidebar();
+  updateUrl();
+  window.scrollTo(0, 0);
+}
+
+function switchPart(part) {
+  state.part = part;
+  state.qIndex = 0;
+  state.artIndex = 0;
+  renderSidebar();
+  el("article-body").innerHTML = "<p class='summa-loading'>Loading this part of the Summa…</p>";
+  ensurePart(part).then(function () {
+    render();
+  }).catch(function (err) {
+    el("article-body").innerHTML = "<p>Could not load this part.</p>";
+    console.error(err);
+  });
+}
+
+function jumpTo(qnum, anum) {
+  const part = currentPart();
+  if (!part) return false;
+  const qi = part.questions.findIndex(function (x) { return x.id === qnum; });
+  if (qi < 0) return false;
+  state.qIndex = qi;
+  if (anum) {
+    const ai = part.questions[qi].articles.findIndex(function (x) { return x.id === anum; });
+    state.artIndex = ai >= 0 ? ai : 0;
+  } else {
+    state.artIndex = 0;
+  }
+  render();
+  return true;
+}
+
+el("article-select").addEventListener("change", function () {
+  state.artIndex = +this.value;
+  render();
+});
+el("show-guide").addEventListener("change", function () {
+  el("summa-guide").style.display = this.checked ? "" : "none";
+});
+el("show-comm").addEventListener("change", function () {
+  el("summa-commentary").style.display = this.checked ? "" : "none";
+});
+el("prev-art").addEventListener("click", function (e) {
+  e.preventDefault();
+  const part = currentPart();
+  if (!part) return;
+  const q = part.questions[state.qIndex];
+  if (state.artIndex > 0) { state.artIndex--; render(); }
+  else if (state.qIndex > 0) {
+    state.qIndex--;
+    state.artIndex = part.questions[state.qIndex].articles.length - 1;
+    render();
+  }
+});
+el("next-art").addEventListener("click", function (e) {
+  e.preventDefault();
+  const part = currentPart();
+  if (!part) return;
+  const q = part.questions[state.qIndex];
+  if (state.artIndex < q.articles.length - 1) { state.artIndex++; render(); }
+  else if (state.qIndex < part.questions.length - 1) {
+    state.qIndex++; state.artIndex = 0; render();
+  }
+});
+el("toggle-side").addEventListener("click", function () {
+  el("summa-sidebar").classList.toggle("open");
+});
+document.querySelectorAll(".part-btn").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    switchPart(btn.getAttribute("data-part"));
+  });
+});
+el("summa-search").addEventListener("input", function () {
+  state.filter = this.value;
+  renderSidebar();
+});
+el("summa-jump").addEventListener("keydown", function (e) {
+  if (e.key !== "Enter") return;
+  const raw = this.value.trim();
+  const m = raw.match(/q?\s*(\d+)\s*(?:[.,:a]\s*(\d+))?/i);
+  if (!m) return;
+  if (jumpTo(parseInt(m[1], 10), m[2] ? parseInt(m[2], 10) : 0)) this.blur();
+});
+
+parseDeepLink();
+var deepLinked = !!(new URLSearchParams(window.location.search).get("q"));
+ensurePart(state.part).then(function () {
+  parseDeepLink();
+  render();
+  if (deepLinked) {
+    setTimeout(function () { scrollToArticle(); }, 120);
+  }
+}).catch(function () {
+  el("article-body").innerHTML = "<p>Summa data failed to load.</p>";
+});
+</script>
+<script src="../js/site-nav.js"></script>
+<script src="../js/ambient-dust.js"></script>
+<script src="../js/epic-reveal.js"></script>
+
+</body>
+</html>

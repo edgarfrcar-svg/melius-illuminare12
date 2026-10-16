@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figures &mdash; Melius Illuminare</title>
+<link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/site-polish.css">
+  <link rel="stylesheet" href="css/mobile.css">
+  <link rel="stylesheet" href="css/sacred-objects.css">
+<style>
+  /* Directory + side profile panel */
+  .figures-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    min-height: calc(100vh - 70px);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  @media (max-width: 900px) {
+    .figures-layout {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+    .figures-list-pane {
+      position: relative;
+      top: auto;
+      max-height: none;
+      border-right: none;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .figures-list {
+      max-height: 38vh;
+      -webkit-overflow-scrolling: touch;
+    }
+    .list-controls input[type="search"] {
+      font-size: 16px;
+      min-height: 44px;
+    }
+    .filter-row {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .figure-row {
+      min-height: 56px;
+      padding: 0.85rem 1rem;
+    }
+    .figures-detail-pane {
+      padding: 1rem 0.9rem 2.5rem;
+    }
+  }
+  @media (max-width: 560px) {
+    .figures-list { max-height: 34vh; }
+  }
+
+  .figures-list-pane {
+    border-right: 1px solid var(--hairline);
+    background: var(--bg-deep);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 70px);
+    position: sticky;
+    top: 70px;
+  }
+  .list-controls {
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: 1px solid var(--hairline);
+    flex-shrink: 0;
+  }
+  .list-controls input[type="search"] {
+    width: 100%;
+    background: var(--bg-panel);
+    border: 1px solid var(--hairline);
+    color: var(--ink);
+    font-family: var(--serif-body);
+    font-size: 0.95rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 3px;
+    margin-bottom: 0.7rem;
+  }
+  .list-controls input:focus {
+    outline: 1px solid var(--gold);
+    border-color: var(--gold);
+  }
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .filter-chip {
+    border: 1px solid var(--hairline);
+    background: transparent;
+    color: var(--ink-dim);
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-family: var(--serif-body);
+    font-size: 0.78rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.2s ease;
+  }
+  .filter-chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .filter-chip.active { color: var(--ink); border-color: currentColor; }
+  .filter-chip:hover { color: var(--ink); }
+  .era-filter-note {
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold-glow);
+    margin: 0 0 0.5rem;
+  }
+  .filter-row { flex-wrap: wrap; gap: 0.4rem; }
+  .filter-chip { font-size: 0.72rem; letter-spacing: 0.04em; }
+
+  .figures-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0.5rem 0;
+  }
+  .figure-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-left: 3px solid transparent;
+    color: var(--ink);
+    font-family: var(--serif-body);
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .figure-row:hover, .figure-row:focus-visible {
+    background: rgba(236,229,212,0.05);
+  }
+  .figure-row.active {
+    background: rgba(201,162,39,0.08);
+    border-left-color: var(--ring-color, var(--gold));
+  }
+  .figure-row .mini-portrait {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 2px solid var(--ring-color, var(--gold));
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-panel);
+    font-family: var(--serif-display);
+    font-size: 0.85rem;
+    position: relative;
+    transition:
+      border-color 0.45s ease,
+      box-shadow 0.55s ease,
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .figure-row .mini-portrait .monogram {
+    position: relative;
+    z-index: 1;
+    transition: opacity 0.4s ease, filter 0.45s ease, transform 0.45s ease;
+  }
+  .figure-row .mini-portrait img.portrait-hover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.08);
+    filter: brightness(0.92) saturate(0.9);
+    transition:
+      opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      filter 0.55s ease;
+    z-index: 2;
+    pointer-events: none;
+  }
+  /* Mystical reveal: soft gold aura, slow fade, gentle settle */
+  .figure-row:hover .mini-portrait,
+  .figure-row:focus-visible .mini-portrait,
+  .figure-row.active .mini-portrait {
+    border-color: var(--gold-glow, #e6c56a);
+    box-shadow:
+      0 0 0 1px rgba(201, 162, 39, 0.35),
+      0 0 14px 2px rgba(201, 162, 39, 0.28),
+      0 0 28px 4px rgba(255, 210, 120, 0.12);
+    transform: scale(1.06);
+  }
+  .figure-row:hover .mini-portrait img.portrait-hover,
+  .figure-row:focus-visible .mini-portrait img.portrait-hover,
+  .figure-row.active .mini-portrait img.portrait-hover {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1.05) saturate(1.05);
+  }
+  .figure-row:hover .mini-portrait .monogram,
+  .figure-row:focus-visible .mini-portrait .monogram,
+  .figure-row.active .mini-portrait .monogram {
+    opacity: 0;
+    filter: blur(2px);
+    transform: scale(0.92);
+  }
+  .figure-row .row-text { min-width: 0; }
+  .figure-row .row-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .figure-row .row-meta {
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+  }
+
+  /* ——— Profile panel (right side) ——— */
+  .profile-pane {
+    padding: 2rem 2.5rem 3rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 70px);
+  }
+  @media (max-width: 900px) {
+    .profile-pane { max-height: none; padding: 1.5rem 1.2rem 3rem; }
+  }
+
+  .profile-empty {
+    color: var(--ink-dim);
+    text-align: center;
+    padding: 4rem 1rem;
+    font-style: italic;
+  }
+
+  .profile-card {
+    animation: panel-in 0.35s ease;
+  }
+  @keyframes panel-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .profile-top {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 1.8rem;
+    margin-bottom: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 600px) {
+    .profile-top { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  }
+
+  .profile-side-portrait {
+    width: 180px; height: 180px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 2px solid var(--ring-color, var(--gold));
+    box-shadow: 0 0 36px rgba(0,0,0,0.4), 0 0 24px var(--ring-glow, transparent);
+    background: var(--bg-panel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif-display);
+    font-size: 2.4rem;
+  }
+  .profile-side-portrait img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+
+  .profile-identity h1 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin: 0 0 0.35rem;
+  }
+  .profile-identity .dates {
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+  }
+  .profile-identity .epithet {
+    font-style: italic;
+    color: var(--ink-dim);
+    margin: 0.6rem 0 1rem;
+    font-size: 1.05rem;
+  }
+
+  .profile-section {
+    margin-bottom: 1.8rem;
+  }
+  .profile-section h2 {
+    font-size: 1.05rem;
+    margin: 0 0 0.7rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--hairline);
+    letter-spacing: 0.06em;
+  }
+  .profile-section p {
+    color: var(--ink-dim);
+    margin: 0 0 0.8rem;
+    line-height: 1.65;
+  }
+
+  .works-list, .sources-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .works-list li, .sources-list li {
+    padding: 0.4rem 0;
+    border-bottom: 1px dashed var(--hairline);
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+  }
+  .works-list li:last-child, .sources-list li:last-child {
+    border-bottom: none;
+  }
+  .works-list li::before {
+    content: '† ';
+    color: var(--ring-color, var(--gold));
+    font-size: 0.8rem;
+  }
+  .works-list a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .works-list a:hover, .works-list a:focus-visible {
+    color: var(--gold-glow);
+    border-bottom-color: var(--gold);
+  }
+
+
+  .full-profile-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+  }
+
+  .list-count {
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+    padding: 0.5rem 1rem 0.8rem;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .mini-portrait .monogram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-family: var(--serif-display, Georgia, serif);
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .profile-side-portrait img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="wordmark">MELIUS&nbsp;ILLUMINARE</a>
+  <nav>
+    <a href="figures.html">Figures</a>
+    <a href="concepts.html">Concepts</a>
+      <a href="magisterium.html">Magisterium</a>
+      <a href="papacy.html">Papacy</a>
+      <a href="prayer.html">Prayer</a>
+      <a href="mass.html">Mass</a>
+    <a href="spiritualities.html">Spiritualities</a>
+    <a href="theological-tree.html">Theological Tree</a>
+    <a href="texts/bible.html">Sacred Texts</a>
+    <a href="store.html">Store</a>
+      <a href="about.html">About</a>
+  </nav>
+</header>
+
+<div class="figures-layout">
+
+  <!-- LEFT: searchable, filterable list -->
+  <aside class="figures-list-pane">
+    <div class="list-controls">
+      <input type="search" id="search-input" placeholder="Search by name…" aria-label="Search figures">
+      <p class="era-filter-note">Filter by era · Antiquity through the present</p>
+      <div class="filter-row" id="filter-chips"></div>
+    </div>
+    <div class="figures-list" id="figures-list" role="listbox" aria-label="Theologians and Church Fathers"></div>
+    <div class="list-count" id="list-count"></div>
+  </aside>
+
+  <!-- RIGHT: profile card -->
+  <main class="profile-pane" id="profile-pane">
+    <div class="profile-empty">Select a name from the list to view their profile, works, and sources.</div>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>Directory of Church Fathers, Doctors, and Catholic theologians as received by the Church. Portraits from public-domain sources only. <a href="about.html">Sourcing policy</a></p>
+</footer>
+
+<script src="js/figures.js"></script>
+<script>
+(function () {
+  let activeFilters = new Set(Object.keys(TRADITION_COLORS));
+  let selectedId = null;
+
+  const listEl = document.getElementById('figures-list');
+  const profileEl = document.getElementById('profile-pane');
+  const searchEl = document.getElementById('search-input');
+  const chipsEl = document.getElementById('filter-chips');
+  const countEl = document.getElementById('list-count');
+
+  // Build era filter chips
+  Object.entries(TRADITION_COLORS).forEach(function ([key, t]) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'filter-chip active';
+    chip.innerHTML = '<span class="dot" style="background:' + t.color + '"></span>' + t.name;
+    chip.title = t.name + (t.range ? ' · ' + t.range : '');
+    chip.addEventListener('click', function () {
+      if (activeFilters.has(key)) {
+        activeFilters.delete(key);
+        chip.classList.remove('active');
+      } else {
+        activeFilters.add(key);
+        chip.classList.add('active');
+      }
+      renderList();
+    });
+    chipsEl.appendChild(chip);
+  });
+
+
+  function filteredFigures() {
+    const q = (searchEl.value || '').trim().toLowerCase();
+    const ERA_ORDER = Object.keys(TRADITION_COLORS);
+    return FIGURES
+      .filter(function (f) { return activeFilters.has(f.tradition); })
+      .filter(function (f) {
+        if (!q) return true;
+        return (f.name + ' ' + (f.epithet || '') + ' ' + (f.dates || '') + ' ' + (f.eraLabel || '')).toLowerCase().indexOf(q) !== -1;
+      })
+      .slice()
+      .sort(function (a, b) {
+        function sortKey(f) {
+          if (f.id === 'elijah') return -900;
+          if (f.id === 'leo-xiv') return 9999;
+          var d = String(f.dates || '');
+          var bc = /BC/i.test(d);
+          var nums = d.match(/\d{1,4}/g);
+          if (!nums) return 0;
+          var y = parseInt(nums[nums.length - 1], 10);
+          if (bc) y = -y;
+          if (/b\./i.test(d) && !/[–-]\s*\d{3,4}/.test(d)) y = 9000 + y;
+          return y;
+        }
+        return sortKey(a) - sortKey(b);
+      });
+  }
+
+  function renderList() {
+    const items = filteredFigures();
+    const frag = document.createDocumentFragment();
+    items.forEach(function (fig) {
+      const t = TRADITION_COLORS[fig.tradition];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'figure-row' + (fig.id === selectedId ? ' active' : '');
+      btn.dataset.id = fig.id;
+      btn.style.setProperty('--ring-color', t.color);
+      btn.setAttribute('role', 'option');
+      btn.setAttribute('aria-selected', fig.id === selectedId ? 'true' : 'false');
+      // Monogram by default; public-domain portrait on hover/active
+      var portraitImg = '';
+      if (fig.img) {
+        portraitImg = '<img class="portrait-hover" src="' + fig.img + '" alt="" loading="lazy" decoding="async" width="42" height="42">';
+      }
+      btn.innerHTML =
+        '<div class="mini-portrait">' + monogramHTML(fig) + portraitImg + '</div>' +
+        '<div class="row-text">' +
+          '<div class="row-name">' + fig.name + '</div>' +
+          '<div class="row-meta">' + fig.dates + (t && t.name ? ' · ' + t.name : '') + '</div>' +
+        '</div>';
+      frag.appendChild(btn);
+    });
+    listEl.innerHTML = '';
+    listEl.appendChild(frag);
+    countEl.textContent = items.length + ' figure' + (items.length === 1 ? '' : 's');
+  }
+
+  // One listener for the whole list (no per-row listeners)
+  listEl.addEventListener('click', function (ev) {
+    const btn = ev.target.closest('.figure-row');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const fig = FIGURES.find(function (f) { return f.id === id; });
+    if (!fig) return;
+    selectedId = id;
+    // Update active state without rebuilding every row when possible
+    listEl.querySelectorAll('.figure-row').forEach(function (row) {
+      const on = row.dataset.id === selectedId;
+      row.classList.toggle('active', on);
+      row.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    renderProfile(fig);
+  });
+
+  function renderProfile(fig) {
+    const t = TRADITION_COLORS[fig.tradition];
+    const worksHtml = (fig.works || []).map(function (w) {
+      if (typeof w === 'string') return '<li>' + w + '</li>';
+      const title = w.title || '';
+      let url = w.url || '';
+      // Normalize legacy hash links to query id
+      if (url && url.indexOf('work.html#') !== -1) {
+        url = url.replace(/work\.html#/, 'work.html?id=');
+      }
+      if (url) {
+        const onSite = url.indexOf('texts/work.html') !== -1 || url.indexOf('texts/summa.html') !== -1;
+        if (onSite) {
+          return '<li><a href="' + url + '">' + title + '</a></li>';
+        }
+        return '<li><a href="' + url + '" target="_blank" rel="noopener">' + title + '</a></li>';
+      }
+      return '<li>' + title + '</li>';
+    }).join('');
+
+    const fullLink = '<p style="margin-top:1.2rem"><a class="btn btn-primary full-profile-link" href="figures/profile.html?id=' + encodeURIComponent(fig.id) + '">Open full profile page</a></p>';
+
+    profileEl.innerHTML =
+      '<article class="profile-card" style="--ring-color:' + t.color + '; --ring-glow:' + t.glow + '">' +
+        '<div class="profile-top">' +
+          '<div class="profile-side-portrait">' + portraitHTML(fig) + '</div>' +
+          '<div class="profile-identity">' +
+            '<span class="tag-pill" style="border-color:' + t.color + '; color:' + t.color + '">' + t.name + '</span>' +
+            '<h1>' + fig.name + '</h1>' +
+            '<div class="dates">' + fig.dates + '</div>' +
+            '<p class="epithet">' + (fig.epithet || '') + '</p>' +
+          '</div>' +
+        '</div>' +
+        '<div class="profile-section">' +
+          '<h2>Works</h2>' +
+          '<ul class="works-list">' + (worksHtml || '<li>Works list forthcoming.</li>') + '</ul>' +
+          '<p style="margin-top:1rem;font-size:0.85rem;color:var(--ink-dim)">Works marked with a link open the full public-domain text <strong>on this site</strong>. More works are being loaded into the in-site library from verified public-domain sources (Catholic Library, CCEL, Ante-Nicene/Nicene Fathers series).</p>' +
+          fullLink +
+        '</div>' +
+      '</article>';
+  }
+
+  // Debounced search — avoids re-render on every keystroke
+  let searchTimer = null;
+  searchEl.addEventListener('input', function () {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(renderList, 120);
+  });
+
+  // Initial render — select first figure so the panel is never empty
+  if (FIGURES.length) {
+    selectedId = FIGURES[0].id;
+  }
+  renderList();
+  if (FIGURES.length) {
+    renderProfile(FIGURES[0]);
+  }
+})();
+</script>
+<script src="js/site-nav.js"></script>
+<script src="js/ambient-dust.js"></script>
+<script src="js/epic-reveal.js"></script>
+
+</body>
+</html>

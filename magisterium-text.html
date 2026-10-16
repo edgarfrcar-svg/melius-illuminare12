@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Redirecting…</title>
+<script>
+(function () {
+  var q = window.location.search || "";
+  var h = window.location.hash || "";
+  window.location.replace("texts/work.html" + q + h);
+})();
+</script>
+<meta http-equiv="refresh" content="0;url=texts/work.html">
+</head>
+<body>
+<p>Opening the library reader… <a id="go" href="texts/work.html">Continue</a></p>
+<script>
+document.getElementById("go").href = "texts/work.html" + (window.location.search || "") + (window.location.hash || "");
+</script>
+<script src="js/site-nav.js"></script>
+</body>
+</html>
